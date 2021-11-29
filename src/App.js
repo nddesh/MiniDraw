@@ -1,5 +1,6 @@
 // fill in operations here to perform the undo/redo using the command objects
 import React, { Component } from 'react';
+import _isEqual from 'lodash/isEqual';
 
 import ControlPanel from './containers/ControlPanel/ControlPanel';
 import Workspace from './containers/Workspace/Workspace';
@@ -16,8 +17,32 @@ import ChangeFillColorCommandObject from './shared/commandObjects/ChangeFillColo
 import ChangeBorderColorCommandObject from './shared/commandObjects/ChangeBorderColorCommandObject';
 import ChangeBorderWidthCommandObject from './shared/commandObjects/ChangeBorderWidthCommandObject';
 import MoveShapeCommandObject from './shared/commandObjects/MoveShapeCommandObject';
+import { createCommandInstance } from './shared/commandObjects/utils';
+
+import { firebaseConfig } from './config';
 
 import './App.css';
+
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+import { getFirestore, getDoc, doc, collection, setDoc } from 'firebase/firestore';
+
+const app = firebase.initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const getWorkspaceData = async (db, workspaceName, undoHandler) => {
+  const docRef = doc(db, 'workspaces', workspaceName);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const doc = docSnap.data();
+    const newCommandList = doc.commandList.map((c) => {
+      return createCommandInstance(undoHandler, c);
+    });
+    return { ...doc, commandList: newCommandList };
+  } else {
+    console.log('No such document!');
+  }
+};
 class App extends Component {
   state = {
     // controls
@@ -64,6 +89,10 @@ class App extends Component {
   }
 
   componentDidMount() {
+    getWorkspaceData(db, 'workspace-1', this.undoHandler).then((res) => {
+      this.setState({ ...res });
+    });
+
     document.addEventListener('keydown', (e) => {
       if (this.state.isCommandKeyPress && !this.state.isShiftKeyPress) {
         if (e.key === 'z') this.undo();
@@ -92,6 +121,38 @@ class App extends Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const updatedList = [];
+
+    if (!_isEqual(prevState.shapes, this.state.shapes)) {
+      updatedList.push('shapes');
+    }
+    if (!_isEqual(prevState.shapesMap, this.state.shapesMap)) {
+      updatedList.push('shapesMap');
+    }
+    if (!_isEqual(prevState.commandList, this.state.commandList)) {
+      updatedList.push('commandList');
+    }
+    if (!_isEqual(prevState.currCommand, this.state.currCommand)) {
+      updatedList.push('currCommand');
+    }
+
+    if (updatedList.length > 0) {
+      const updatedDoc = {
+        shapes: this.state.shapes,
+        shapesMap: this.state.shapesMap,
+        commandList: this.state.commandList.map((command) => {
+          return command.getDataForSave();
+        }),
+        currCommand: this.state.currCommand,
+      };
+      new Promise((resolve, reject) => {
+        const workspacesRef = collection(db, 'workspaces');
+        setDoc(doc(workspacesRef, 'workspace-1'), { ...updatedDoc });
+      });
+    }
+  }
+
   getCurrState = () => {
     return this.state;
   };
@@ -104,11 +165,6 @@ class App extends Component {
     this.setState({ ...this.state, ...updatedState });
   };
 
-  /*
-   * TODO:
-   * add the commandObj to the commandList so
-   * that is available for undoing.
-   */
   registerExecution = (commandObject) => {
     let newCommandList = [...this.state.commandList];
     if (this.state.currCommand !== this.state.commandList.length - 1) {
@@ -125,11 +181,7 @@ class App extends Component {
   canRedo = () => {
     return this.state.currCommand < this.state.commandList.length - 1;
   };
-  /*
-   * TODO:
-   * actually call the undo method of the command at
-   * the current position in the undo stack
-   */
+
   undo = () => {
     if (this.canUndo()) {
       const commandToUndo = this.state.commandList[this.state.currCommand];
@@ -138,11 +190,6 @@ class App extends Component {
     }
   };
 
-  /*
-   * TODO:
-   * actually call the redo method of the command at
-   * the current position in the undo stack.
-   */
   redo = () => {
     if (this.canRedo()) {
       const commandToRedo = this.state.commandList[this.state.currCommand + 1];
@@ -287,7 +334,11 @@ class App extends Component {
 
   changeCurrFillColor = (fillColor) => {
     if (fillColor !== this.state.currFillColor && this.getCurrShape()) {
-      const data = { oldValue: this.state.currFillColor, newValue: fillColor };
+      const data = {
+        oldValue: this.state.currFillColor,
+        newValue: fillColor,
+        targetShape: this.getCurrShape(),
+      };
       const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data);
       if (commandObj.canExecute()) {
         commandObj.execute();
@@ -310,7 +361,7 @@ class App extends Component {
       shapesMap,
       selectedShapeId,
     } = this.state;
-
+    console.log(this.state);
     // update the context with the functions and values defined above and from state
     // and pass it to the structure below it (control panel and workspace)
     return (

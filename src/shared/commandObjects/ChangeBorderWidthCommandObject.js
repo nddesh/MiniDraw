@@ -1,8 +1,9 @@
 import CommandObject from './CommandObject';
+import { COMMAND_TYPES } from './constants';
 
 export default class ChangeBorderWidthCommandObject extends CommandObject {
   constructor(undoHandler, data) {
-    super(undoHandler, true);
+    super(undoHandler, true, { data, type: COMMAND_TYPES.CHANGE_BORDER_WIDTH });
     this.targetObject = undoHandler.getCurrShape();
     this.newValue = data.newValue; // color
     this.oldValue = data.oldValue; // color

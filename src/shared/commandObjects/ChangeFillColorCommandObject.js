@@ -1,12 +1,13 @@
 import CommandObject from './CommandObject';
+import { COMMAND_TYPES } from './constants';
 
 export default class ChangeFillColorCommandObject extends CommandObject {
   constructor(undoHandler, data) {
-    super(undoHandler, true);
-    this.targetObject = undoHandler.getCurrShape();
+    super(undoHandler, true, { data, type: COMMAND_TYPES.CHANGE_FILL_COLOR });
+    this.targetObject = data.targetShape;
     this.newValue = data.newValue; // color
     this.oldValue = data.oldValue; // color
-    this.commandName = `Change ${this.targetObject.type} Fill Color to `;
+    // this.commandName = `Change ${this.targetObject.type} Fill Color to `;
     this.colorCode = this.newValue;
   }
 

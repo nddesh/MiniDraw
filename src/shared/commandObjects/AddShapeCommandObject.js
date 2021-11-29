@@ -1,8 +1,10 @@
 import CommandObject from './CommandObject';
+import { COMMAND_TYPES } from './constants';
 
 export default class AddShapeCommandObject extends CommandObject {
   constructor(undoHandler, data) {
-    super(undoHandler, true);
+    super(undoHandler, true, { data, type: COMMAND_TYPES.ADD_SHAPE });
+    this.data = data;
     this.selectedObj = data;
     this.commandName = `Create ${data.type}`;
   }

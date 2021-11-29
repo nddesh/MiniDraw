@@ -1,8 +1,9 @@
 import CommandObject from './CommandObject';
+import { COMMAND_TYPES } from './constants';
 
 export default class ChangeFillColorCommandObject extends CommandObject {
   constructor(undoHandler, data) {
-    super(undoHandler, true);
+    super(undoHandler, true, { data, type: COMMAND_TYPES.CHANGE_FILL_COLOR });
     this.targetObject = undoHandler.getCurrShape();
     this.newValue = data.newValue; // color
     this.oldValue = data.oldValue; // color
@@ -57,7 +58,7 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    */
   repeat() {
     if (this.targetObject !== null) {
-      this.targetObject = this.targetObject; // get new selected obj
+      // this.targetObject = this.targetObject; // get new selected obj
       this.oldValue = this.targetObject.fillColor; // object's current color
       // no change to newValue since reusing the same color
       this.targetObject.fillColor = this.newValue; // actually change
