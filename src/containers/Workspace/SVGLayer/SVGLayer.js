@@ -1,13 +1,13 @@
-// you will need to MODIFY this and other files to make them work with command objects, 
+// you will need to MODIFY this and other files to make them work with command objects,
 // instead of directly performing the actions
-import React, { useEffect, useCallback, useContext, useState } from "react";
+import React, { useEffect, useCallback, useContext, useState } from 'react';
 
-import Line from "./shapes/Line";
-import Rect from "./shapes/Rect";
-import Ellipse from "./shapes/Ellipse";
+import Line from './shapes/Line';
+import Rect from './shapes/Rect';
+import Ellipse from './shapes/Ellipse';
 
-import ControlContext from "../../../contexts/control-context";
-import { selectShadowId } from "../../../shared/util";
+import ControlContext from '../../../contexts/control-context';
+import { selectShadowId } from '../../../shared/util';
 
 const SVGLayer = () => {
   const {
@@ -21,6 +21,8 @@ const SVGLayer = () => {
     moveShape,
     selectedShapeId,
     selectShape,
+    startMoveShape,
+    stopMoveShape,
   } = useContext(ControlContext);
 
   // use useState to set elements in the React state directly
@@ -38,7 +40,7 @@ const SVGLayer = () => {
   });
 
   const handleMouseDown = (e) => {
-    if (currMode !== "select" && currMode !== "line") {
+    if (currMode !== 'select' && currMode !== 'line') {
       // should create
       setDrawing(true);
       setInitPoint({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
@@ -46,7 +48,7 @@ const SVGLayer = () => {
       e.preventDefault();
     } else {
       // should select
-      if (e.target.nodeName === "svg") {
+      if (e.target.nodeName === 'svg') {
         // deselect
         selectShape(undefined);
       } else {
@@ -58,9 +60,8 @@ const SVGLayer = () => {
           x: e.nativeEvent.offsetX,
           y: e.nativeEvent.offsetY,
         });
-        setDraggingShape(
-          shapesMap[shapes.filter((shapeId) => shapeId === targetId)[0]]
-        );
+        setDraggingShape(shapesMap[shapes.filter((shapeId) => shapeId === targetId)[0]]);
+        startMoveShape(targetId);
       }
     }
   };
@@ -86,14 +87,14 @@ const SVGLayer = () => {
   };
 
   const handleMouseUp = (e) => {
-    if (currMode !== "select") {
+    if (currMode !== 'select') {
       if (!(initPoint.x === currPoint.x && initPoint.y === currPoint.y)) {
         // check if it's too small
         const threshold = 10;
         let shouldCreate = true;
         const deltaX = Math.abs(initPoint.x - currPoint.x);
         const deltaY = Math.abs(initPoint.y - currPoint.y);
-        if (currMode === "line") {
+        if (currMode === 'line') {
           if (Math.sqrt(deltaX ** 2 + deltaY ** 2) < threshold) {
             shouldCreate = false;
           }
@@ -104,20 +105,20 @@ const SVGLayer = () => {
         }
 
         if (shouldCreate) {
-          if (currMode != "line") {
-          // create
-          addShape({
-            type: currMode,
-            visible: true,
-            initCoords: initPoint,
-            finalCoords: currPoint,
-            borderColor: currBorderColor,
-            borderWidth: currBorderWidth,
-            fillColor: currFillColor,
-          });
-          selectShape(undefined);
+          if (currMode != 'line') {
+            // create
+            addShape({
+              type: currMode,
+              visible: true,
+              initCoords: initPoint,
+              finalCoords: currPoint,
+              borderColor: currBorderColor,
+              borderWidth: currBorderWidth,
+              fillColor: currFillColor,
+            });
+            selectShape(undefined);
+          }
         }
-      }
       }
 
       setDrawing(false);
@@ -127,6 +128,7 @@ const SVGLayer = () => {
       setDragging(false);
       setDraggingShape(undefined);
       setMouseDownPoint({ x: undefined, y: undefined });
+      stopMoveShape();
     }
   };
 
@@ -135,7 +137,7 @@ const SVGLayer = () => {
   // the second is the dependencies that the function relies on
   const escKeyDownHandler = useCallback(
     (e) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         // abort
         if (drawing) {
           setDrawing(false);
@@ -165,24 +167,13 @@ const SVGLayer = () => {
   // the first argument is the function that will run
   // the second argument are the dependencies, meaning this will only run when there is a change in these values
   useEffect(() => {
-    window.addEventListener("keydown", escKeyDownHandler, true);
-    return () => window.removeEventListener("keydown", escKeyDownHandler, true);
+    window.addEventListener('keydown', escKeyDownHandler, true);
+    return () => window.removeEventListener('keydown', escKeyDownHandler, true);
   }, [escKeyDownHandler]);
 
   const genShape = (shapeData, key = undefined) => {
-    // console.log("yo")
-    const {
-      initCoords,
-      finalCoords,
-      borderColor,
-      borderWidth,
-      fillColor,
-      id,
-    } = shapeData;
-    const filter =
-      selectedShapeId && selectedShapeId === id
-        ? `url(#${selectShadowId})`
-        : null;
+    const { initCoords, finalCoords, borderColor, borderWidth, fillColor, id } = shapeData;
+    const filter = selectedShapeId && selectedShapeId === id ? `url(#${selectShadowId})` : null;
     switch (shapeData.type) {
       // case "line": {
       //   return React.createElement(Line, {
@@ -197,7 +188,7 @@ const SVGLayer = () => {
       //     filter,
       //   });
       // }
-      case "rect": {
+      case 'rect': {
         return React.createElement(Rect, {
           x: Math.min(initCoords.x, finalCoords.x),
           y: Math.min(initCoords.y, finalCoords.y),
@@ -211,7 +202,7 @@ const SVGLayer = () => {
           filter,
         });
       }
-      case "ellipse": {
+      case 'ellipse': {
         let x = Math.min(finalCoords.x, initCoords.x);
         let y = Math.min(finalCoords.y, initCoords.y);
         let w = Math.abs(finalCoords.x - initCoords.x);
@@ -271,19 +262,8 @@ const SVGLayer = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      <filter
-        id={selectShadowId}
-        x="-100%"
-        y="-100%"
-        width="400%"
-        height="400%"
-      >
-        <feDropShadow
-          dx="0"
-          dy="0"
-          stdDeviation="15"
-          floodColor="rgba(0, 0, 0, 0.7)"
-        />
+      <filter id={selectShadowId} x="-100%" y="-100%" width="400%" height="400%">
+        <feDropShadow dx="0" dy="0" stdDeviation="15" floodColor="rgba(0, 0, 0, 0.7)" />
       </filter>
       {shapes.map((shapeId, idx) => {
         return renderShape(shapesMap[shapeId], idx);

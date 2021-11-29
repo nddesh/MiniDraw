@@ -1,13 +1,12 @@
 import CommandObject from './CommandObject';
 
-export default class ChangeFillColorCommandObject extends CommandObject {
+export default class ChangeBorderWidthCommandObject extends CommandObject {
   constructor(undoHandler, data) {
     super(undoHandler, true);
     this.targetObject = undoHandler.getCurrShape();
-    this.newValue = data.newValue; // color
-    this.oldValue = data.oldValue; // color
-    this.commandName = `Change ${this.targetObject.type} Fill Color to `;
-    this.colorCode = this.newValue;
+    this.newValue = data.newValue; // shape
+    this.oldValue = data.oldValue; // shape
+    this.commandName = `Move ${this.targetObject.type}`;
   }
 
   /* override to return true if this command can be executed,
@@ -30,8 +29,12 @@ export default class ChangeFillColorCommandObject extends CommandObject {
   /* override to undo the operation of this command
    */
   undo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.oldValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.oldValue });
+    const updateData = {
+      initCoords: this.oldValue.initCoords,
+      finalCoords: this.oldValue.finalCoords,
+    };
+    this.undoHandler.updateShape(this.targetObject.id, { ...updateData });
+    this.undoHandler.selectShape(this.targetObject.id, { ...updateData });
   }
 
   /* override to redo the operation of this command, which means to
@@ -40,8 +43,12 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    * can be undone can be redone, so there is no need for a canRedo.
    */
   redo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.newValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.newValue });
+    const updateData = {
+      initCoords: this.newValue.initCoords,
+      finalCoords: this.newValue.finalCoords,
+    };
+    this.undoHandler.updateShape(this.targetObject.id, { ...updateData });
+    this.undoHandler.selectShape(this.targetObject.id, { ...updateData });
   }
 
   /* override to return true if this operation can be repeated in the

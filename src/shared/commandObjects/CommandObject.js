@@ -3,6 +3,7 @@
  * should be like. This is basically an abstract class that particular
  * command objects should extend
  */
+import { v4 as uuidv4 } from 'uuid';
 export default class CommandObject {
   constructor(controls, addToUndoStack = true) {
     this.undoHandler = controls;
@@ -10,6 +11,7 @@ export default class CommandObject {
     this.targetObject = undefined; // object this command affected
     this.newValue = undefined; // new value used by the command
     this.oldValue = undefined; // previous (old) value for the object
+    this.commandId = uuidv4();
   }
 
   /* override to return true if this command can be executed,

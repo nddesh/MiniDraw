@@ -1,13 +1,12 @@
 import CommandObject from './CommandObject';
 
-export default class ChangeFillColorCommandObject extends CommandObject {
+export default class ChangeBorderWidthCommandObject extends CommandObject {
   constructor(undoHandler, data) {
     super(undoHandler, true);
     this.targetObject = undoHandler.getCurrShape();
     this.newValue = data.newValue; // color
     this.oldValue = data.oldValue; // color
-    this.commandName = `Change ${this.targetObject.type} Fill Color to `;
-    this.colorCode = this.newValue;
+    this.commandName = `Change ${this.targetObject.type} Border Width to ${this.newValue}`;
   }
 
   /* override to return true if this command can be executed,
@@ -30,8 +29,8 @@ export default class ChangeFillColorCommandObject extends CommandObject {
   /* override to undo the operation of this command
    */
   undo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.oldValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.oldValue });
+    this.undoHandler.updateShape(this.targetObject.id, { borderWidth: this.oldValue });
+    this.undoHandler.selectShape(this.targetObject.id, { borderWidth: this.oldValue });
   }
 
   /* override to redo the operation of this command, which means to
@@ -40,8 +39,8 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    * can be undone can be redone, so there is no need for a canRedo.
    */
   redo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.newValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.newValue });
+    this.undoHandler.updateShape(this.targetObject.id, { borderWidth: this.newValue });
+    this.undoHandler.selectShape(this.targetObject.id, { borderWidth: this.newValue });
   }
 
   /* override to return true if this operation can be repeated in the
