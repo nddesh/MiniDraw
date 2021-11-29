@@ -8,21 +8,32 @@ import { COMMAND_TYPES } from './constants';
 
 export const createCommandInstance = (undoHandler, data) => {
   const type = data.type;
+  let commandObj;
   switch (type) {
     case COMMAND_TYPES.ADD_SHAPE:
-      return new AddShapeCommandObject(undoHandler, data.data);
+      commandObj = new AddShapeCommandObject(undoHandler, data.data);
+      break;
     case COMMAND_TYPES.DELETE_SHAPE:
-      return new DeleteShapeCommandObject(undoHandler, data.data);
+      commandObj = new DeleteShapeCommandObject(undoHandler, data.data);
+      break;
     case COMMAND_TYPES.MOVE_SHAPE:
-      return new MoveShapeCommandObject(undoHandler, data.data);
+      commandObj = new MoveShapeCommandObject(undoHandler, data.data);
+      break;
     case COMMAND_TYPES.CHANGE_FILL_COLOR:
-      return new ChangeFillColorCommandObject(undoHandler, data.data);
+      commandObj = new ChangeFillColorCommandObject(undoHandler, data.data);
+      break;
     case COMMAND_TYPES.CHANGE_BORDER_COLOR:
-      return new ChangeBorderColorCommandObject(undoHandler, data.data);
+      commandObj = new ChangeBorderColorCommandObject(undoHandler, data.data);
+      break;
     case COMMAND_TYPES.CHANGE_BORDER_WIDTH:
-      return new ChangeBorderWidthCommandObject(undoHandler, data.data);
+      commandObj = new ChangeBorderWidthCommandObject(undoHandler, data.data);
+      break;
     default:
       alert('invalid type');
-      return null;
+      commandObj = null;
   }
+  // if (commandObj.canExecute()) {
+  //   commandObj.execute();
+  // }
+  return commandObj;
 };
