@@ -28,7 +28,7 @@ const Workspaces = () => {
       <ul>
         {workspaces.map((w) => {
           return (
-            <Link to={`/workspaces/${w.id}`}>
+            <Link to={`/workspaces/${w.id}`} key={w.id}>
               <li>{w.id}</li>
             </Link>
           );

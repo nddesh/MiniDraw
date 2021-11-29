@@ -252,7 +252,11 @@ class WorkspaceRoute extends Component {
    * ---------------------------------------------*/
   changeCurrBorderColor = (borderColor) => {
     if (borderColor !== this.state.currBorderColor && this.getCurrShape()) {
-      const data = { oldValue: this.state.currBorderColor, newValue: borderColor };
+      const data = {
+        oldValue: this.state.currBorderColor,
+        newValue: borderColor,
+        targetShape: this.getCurrShape()
+      };
       const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data);
       if (commandObj.canExecute()) {
         commandObj.execute();
@@ -279,7 +283,11 @@ class WorkspaceRoute extends Component {
   };
   stopSlideBorderWidth = (borderWidth) => {
     if (borderWidth !== this.state.tempBorderWidth && this.getCurrShape()) {
-      const data = { oldValue: this.state.tempBorderWidth, newValue: borderWidth };
+      const data = {
+        oldValue: this.state.tempBorderWidth,
+        newValue: borderWidth,
+        targetShape: this.getCurrShape()
+      };
       const commandObj = new ChangeBorderWidthCommandObject(this.undoHandler, data);
       if (commandObj.canExecute()) {
         commandObj.execute();
