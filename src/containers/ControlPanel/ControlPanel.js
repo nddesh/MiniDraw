@@ -139,7 +139,7 @@ const FillColor = ({ currFillColor, changeCurrFillColor, currBorderColor }) => {
   );
 };
 
-const BorderWidth = ({ currBorderWidth, changeCurrBorderWidth }) => {
+const BorderWidth = ({ currBorderWidth, changeCurrBorderWidth, stopSlideBorderWidth, startSlideBorderWidth, }) => {
   return (
     <div className="Control">
       <h3>Border width:</h3>
@@ -149,6 +149,8 @@ const BorderWidth = ({ currBorderWidth, changeCurrBorderWidth }) => {
           tabIndex="-1"
           style={{ width: 200 }}
           onChange={(e) => changeCurrBorderWidth(e.target.value)}
+          onMouseDown={(e) => startSlideBorderWidth(e.target.value)}
+          onMouseUp={(e) => stopSlideBorderWidth(e.target.value)}
           min={1}
           max={30}
           value={currBorderWidth}
@@ -208,6 +210,8 @@ const ControlPanel = () => {
     changeCurrFillColor,
     currBorderWidth,
     changeCurrBorderWidth,
+    stopSlideBorderWidth,
+    startSlideBorderWidth,
     selectedShapeId,
     selectShape,
     deleteSelectedShape,
@@ -233,6 +237,8 @@ const ControlPanel = () => {
       <BorderWidth
         currBorderWidth={currBorderWidth}
         changeCurrBorderWidth={changeCurrBorderWidth}
+        stopSlideBorderWidth={stopSlideBorderWidth}
+        startSlideBorderWidth={startSlideBorderWidth}
       />
       <FillColor
         currFillColor={currFillColor}
