@@ -4,10 +4,10 @@ import { COMMAND_TYPES } from './constants';
 export default class ChangeFillColorCommandObject extends CommandObject {
   constructor(undoHandler, data) {
     super(undoHandler, true, { data, type: COMMAND_TYPES.CHANGE_FILL_COLOR });
-    this.targetObject = data.targetShape;
+    this.targetObject = undoHandler.getCurrShape();
     this.newValue = data.newValue; // color
     this.oldValue = data.oldValue; // color
-    // this.commandName = `Change ${this.targetObject.type} Fill Color to `;
+    this.commandName = `Change ${this.targetObject.type} Border Color to `;
     this.colorCode = this.newValue;
   }
 
@@ -31,8 +31,8 @@ export default class ChangeFillColorCommandObject extends CommandObject {
   /* override to undo the operation of this command
    */
   undo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.oldValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.oldValue });
+    this.undoHandler.updateShape(this.targetObject.id, { borderColor: this.oldValue });
+    this.undoHandler.selectShape(this.targetObject.id, { borderColor: this.oldValue });
   }
 
   /* override to redo the operation of this command, which means to
@@ -41,8 +41,8 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    * can be undone can be redone, so there is no need for a canRedo.
    */
   redo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.newValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.newValue });
+    this.undoHandler.updateShape(this.targetObject.id, { borderColor: this.newValue });
+    this.undoHandler.selectShape(this.targetObject.id, { borderColor: this.newValue });
   }
 
   /* override to return true if this operation can be repeated in the
@@ -58,7 +58,7 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    */
   repeat() {
     if (this.targetObject !== null) {
-      this.targetObject = this.targetObject; // get new selected obj
+      // this.targetObject = this.targetObject; // get new selected obj
       this.oldValue = this.targetObject.fillColor; // object's current color
       // no change to newValue since reusing the same color
       this.targetObject.fillColor = this.newValue; // actually change

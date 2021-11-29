@@ -1,14 +1,11 @@
 import CommandObject from './CommandObject';
 import { COMMAND_TYPES } from './constants';
 
-export default class ChangeFillColorCommandObject extends CommandObject {
+export default class DeleteShapeCommandObject extends CommandObject {
   constructor(undoHandler, data) {
-    super(undoHandler, true, { data, type: COMMAND_TYPES.CHANGE_FILL_COLOR });
-    this.targetObject = data.targetShape;
-    this.newValue = data.newValue; // color
-    this.oldValue = data.oldValue; // color
-    // this.commandName = `Change ${this.targetObject.type} Fill Color to `;
-    this.colorCode = this.newValue;
+    super(undoHandler, true, { data, type: COMMAND_TYPES.DELETE_SHAPE });
+    this.targetObject = undoHandler.getCurrShape();
+    this.commandName = `Delete ${this.targetObject.type}`;
   }
 
   /* override to return true if this command can be executed,
@@ -31,8 +28,13 @@ export default class ChangeFillColorCommandObject extends CommandObject {
   /* override to undo the operation of this command
    */
   undo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.oldValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.oldValue });
+    const currState = this.undoHandler.getCurrState();
+    let shapesMap = { ...currState.shapesMap };
+    shapesMap[this.targetObject.id].visible = true;
+    this.undoHandler.updateState({
+      shapesMap,
+      selectedShapeId: this.targetObject.id,
+    });
   }
 
   /* override to redo the operation of this command, which means to
@@ -41,8 +43,13 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    * can be undone can be redone, so there is no need for a canRedo.
    */
   redo() {
-    this.undoHandler.updateShape(this.targetObject.id, { fillColor: this.newValue });
-    this.undoHandler.selectShape(this.targetObject.id, { fillColor: this.newValue });
+    const currState = this.undoHandler.getCurrState();
+    let shapesMap = { ...currState.shapesMap };
+    shapesMap[this.targetObject.id].visible = false;
+    this.undoHandler.updateState({
+      shapesMap,
+      selectedShapeId: undefined,
+    });
   }
 
   /* override to return true if this operation can be repeated in the

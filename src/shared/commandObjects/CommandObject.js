@@ -3,13 +3,20 @@
  * should be like. This is basically an abstract class that particular
  * command objects should extend
  */
+import { v4 as uuidv4 } from 'uuid';
 export default class CommandObject {
-  constructor(controls, addToUndoStack = true) {
+  constructor(controls, addToUndoStack = true, dataForSave) {
     this.undoHandler = controls;
     this.addToUndoStack = addToUndoStack; // is this the kind of operations that is queued?
     this.targetObject = undefined; // object this command affected
     this.newValue = undefined; // new value used by the command
     this.oldValue = undefined; // previous (old) value for the object
+    this.commandId = uuidv4();
+    this.dataForSave = dataForSave;
+  }
+
+  getDataForSave() {
+    return this.dataForSave;
   }
 
   /* override to return true if this command can be executed,

@@ -1,0 +1,29 @@
+.CommandListPanel {
+  position: absolute;
+  top: 10px;
+  left: 1260px;
+  width: 180px;
+  height: 700px;
+  border: 1px solid black;
+  overflow: scroll;
+}
+
+.CommandListPanel .list-item {
+  background-color: lightgrey;
+  margin-bottom: 4px;
+  padding: 4px;
+  font-size: 18px;
+  font-weight: 500;
+}
+.CommandListPanel .list-item.active {
+  color: black;
+}
+.CommandListPanel .list-item.disabled {
+  background-color: darkgrey;
+  color: rgb(107, 107, 107);
+  text-decoration: line-through;
+}
+.CommandListPanel .list-item.current {
+  background-color: black;
+  color: rgb(3, 230, 3);
+}
