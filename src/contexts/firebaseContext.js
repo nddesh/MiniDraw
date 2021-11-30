@@ -11,10 +11,14 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const doc = docSnap.data();
-      const newCommandList = doc.workspaceData.commandList.map((c) => {
-        return createCommandInstance(undoHandler, c);
-      });
-      return { ...doc.workspaceData, commandList: newCommandList };
+      // const newCommandList = doc.workspaceData.commandList.map((c) => {
+      //   return createCommandInstance(undoHandler, c);
+      // });
+      // return { ...doc.workspaceData, commandList: newCommandList };
+      return {
+        shapes: doc.workspaceData.shapes,
+        shapesMap: doc.workspaceData.shapesMap,
+      };
     } else {
       console.log('No such document!');
     }
@@ -27,8 +31,8 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     const updatedDoc = {
       shapes,
       shapesMap,
-      commandList,
-      currCommand,
+      // commandList,
+      // currCommand,
     };
     const workspacesRef = collection(firestore, 'workspaces');
     // TODO: Replace test-user with real user.
@@ -57,8 +61,8 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
       workspaceData: {
         shapes: [],
         shapesMap: {},
-        commandList: [],
-        currCommand: -1,
+        // commandList: [],
+        // currCommand: -1,
       },
     });
   };

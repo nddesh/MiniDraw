@@ -22,6 +22,8 @@ import MoveShapeCommandObject from '../../shared/commandObjects/MoveShapeCommand
 import { addEventListeners } from './utils';
 import { FaTextHeight } from 'react-icons/fa';
 
+import { doc, onSnapshot } from 'firebase/firestore';
+
 class WorkspaceRoute extends Component {
   state = {
     // controls
@@ -49,6 +51,10 @@ class WorkspaceRoute extends Component {
     isCommandKeyPress: false,
     isControlKeyPress: false,
     isShiftKeyPress: false,
+
+    // Prevent updating firestore when using slider or color picker
+    // Only update when the change is done.
+    disableUpdateFirestore: false,
   };
 
   constructor() {
@@ -75,28 +81,47 @@ class WorkspaceRoute extends Component {
     });
     // Add undo/redo event listeners.
     addEventListeners(this);
+
+    this.unsubscribeFirestore = onSnapshot(
+      doc(this.props.firestore, 'workspaces', this.props.workspaceId),
+      (document) => {
+        if (document) {
+          const data = document.data();
+          const { workspaceData } = data;
+          this.setState({ ...workspaceData });
+        }
+
+        // console.log('Current data: ', doc.data());
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    this.unsubscribeFirestore();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    // update workspace data
-    const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
-    const updatedList = [];
+    if (!this.state.disableUpdateFirestore) {
+      // update workspace data
+      const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
+      const updatedList = [];
 
-    watchedFields.forEach((f) => {
-      if (!_isEqual(prevState[f], this.state[f])) {
-        updatedList.push(f);
-      }
-    });
-
-    if (updatedList.length > 0) {
-      this.props.updateWorkspaceData(this.props.workspaceId, {
-        shapes: this.state.shapes,
-        shapesMap: this.state.shapesMap,
-        commandList: this.state.commandList.map((command) => {
-          return command.getDataForSave();
-        }),
-        currCommand: this.state.currCommand,
+      watchedFields.forEach((f) => {
+        if (!_isEqual(prevState[f], this.state[f])) {
+          updatedList.push(f);
+        }
       });
+
+      if (updatedList.length > 0) {
+        this.props.updateWorkspaceData(this.props.workspaceId, {
+          shapes: this.state.shapes,
+          shapesMap: this.state.shapesMap,
+          // commandList: this.state.commandList.map((command) => {
+          //   return command.getDataForSave();
+          // }),
+          // currCommand: this.state.currCommand,
+        });
+      }
     }
   }
 
@@ -200,6 +225,12 @@ class WorkspaceRoute extends Component {
     }
   };
 
+  disableUpdateFirestore = (callback) => {
+    this.setState({ disableUpdateFirestore: true }, callback);
+  };
+  enableUpdateFirestore = (callback) => {
+    this.setState({ disableUpdateFirestore: false }, callback);
+  };
   /**---------------------------------------------
    * ADD SHAPE
    * ---------------------------------------------*/
@@ -231,29 +262,33 @@ class WorkspaceRoute extends Component {
     }
   };
   startMoveShape = (id) => {
-    let shapesMap = { ...this.state.shapesMap };
-    this.setState({ tempShape: shapesMap[id] });
+    this.disableUpdateFirestore(() => {
+      let shapesMap = { ...this.state.shapesMap };
+      this.setState({ tempShape: shapesMap[id] });
+    });
   };
   stopMoveShape = () => {
-    if (
-      this.state.tempShape &&
-      this.getCurrShape() &&
-      this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
-    ) {
-      const data = {
-        shape: this.getCurrShape(),
-        oldValue: this.state.tempShape,
-        newValue: this.getCurrShape(),
-        targetShape: this.getCurrShape(),
-      };
+    this.enableUpdateFirestore(() => {
+      if (
+        this.state.tempShape &&
+        this.getCurrShape() &&
+        this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
+      ) {
+        const data = {
+          shape: this.getCurrShape(),
+          oldValue: this.state.tempShape,
+          newValue: this.getCurrShape(),
+          targetShape: this.getCurrShape(),
+        };
 
-      const commandObj = new MoveShapeCommandObject(this.undoHandler, data);
-      if (commandObj.canExecute()) {
-        commandObj.execute();
+        const commandObj = new MoveShapeCommandObject(this.undoHandler, data);
+        if (commandObj.canExecute()) {
+          commandObj.execute();
+        }
       }
-    }
 
-    this.setState({ tempShape: null });
+      this.setState({ tempShape: null });
+    });
   };
 
   /**---------------------------------------------
@@ -302,7 +337,9 @@ class WorkspaceRoute extends Component {
   };
   changeCurrBorderColor = (borderColor) => {
     if (!this.state.tempBorderColor) {
-      this.startChangingBorderColor(borderColor);
+      this.disableUpdateFirestore(() => {
+        this.startChangingBorderColor(borderColor);
+      });
     }
 
     this.setState({ currBorderColor: borderColor });
@@ -314,18 +351,20 @@ class WorkspaceRoute extends Component {
     this.setState({ tempBorderColor: borderColor });
   };
   stopChangingBorderColor = () => {
-    if (this.state.tempBorderColor !== this.state.currBorderColor && this.getCurrShape()) {
-      const data = {
-        oldValue: this.state.tempBorderColor,
-        newValue: this.state.currBorderColor,
-        targetShape: this.getCurrShape(),
-      };
-      const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data);
-      if (commandObj.canExecute()) {
-        commandObj.execute();
+    this.enableUpdateFirestore(() => {
+      if (this.state.tempBorderColor !== this.state.currBorderColor && this.getCurrShape()) {
+        const data = {
+          oldValue: this.state.tempBorderColor,
+          newValue: this.state.currBorderColor,
+          targetShape: this.getCurrShape(),
+        };
+        const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data);
+        if (commandObj.canExecute()) {
+          commandObj.execute();
+        }
       }
-    }
-    this.setState({ tempFillColor: null });
+      this.setState({ tempFillColor: null });
+    });
   };
 
   /**---------------------------------------------
@@ -353,21 +392,25 @@ class WorkspaceRoute extends Component {
     }
   };
   startSlideBorderWidth = (borderWidth) => {
-    this.setState({ tempBorderWidth: borderWidth });
+    this.disableUpdateFirestore(() => {
+      this.setState({ tempBorderWidth: borderWidth });
+    });
   };
   stopSlideBorderWidth = (borderWidth) => {
-    if (borderWidth !== this.state.tempBorderWidth && this.getCurrShape()) {
-      const data = {
-        oldValue: this.state.tempBorderWidth,
-        newValue: borderWidth,
-        targetShape: this.getCurrShape(),
-      };
-      const commandObj = new ChangeBorderWidthCommandObject(this.undoHandler, data);
-      if (commandObj.canExecute()) {
-        commandObj.execute();
+    this.enableUpdateFirestore(() => {
+      if (borderWidth !== this.state.tempBorderWidth && this.getCurrShape()) {
+        const data = {
+          oldValue: this.state.tempBorderWidth,
+          newValue: borderWidth,
+          targetShape: this.getCurrShape(),
+        };
+        const commandObj = new ChangeBorderWidthCommandObject(this.undoHandler, data);
+        if (commandObj.canExecute()) {
+          commandObj.execute();
+        }
       }
-    }
-    this.setState({ tempBorderWidth: null });
+      this.setState({ tempBorderWidth: null });
+    });
   };
 
   /**---------------------------------------------
@@ -391,7 +434,9 @@ class WorkspaceRoute extends Component {
   };
   changeCurrFillColor = (fillColor) => {
     if (!this.state.tempFillColor) {
-      this.startChangingFillColor(fillColor);
+      this.disableUpdateFirestore(() => {
+        this.startChangingFillColor(fillColor);
+      });
     }
     this.setState({ currFillColor: fillColor });
     if (this.state.selectedShapeId) {
@@ -402,18 +447,20 @@ class WorkspaceRoute extends Component {
     this.setState({ tempFillColor: fillColor });
   };
   stopChangingFillColor = () => {
-    if (this.state.tempFillColor && this.state.currFillColor && this.getCurrShape()) {
-      const data = {
-        oldValue: this.state.tempFillColor,
-        newValue: this.state.currFillColor,
-        targetShape: this.getCurrShape(),
-      };
-      const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data);
-      if (commandObj.canExecute()) {
-        commandObj.execute();
+    this.enableUpdateFirestore(() => {
+      if (this.state.tempFillColor && this.state.currFillColor && this.getCurrShape()) {
+        const data = {
+          oldValue: this.state.tempFillColor,
+          newValue: this.state.currFillColor,
+          targetShape: this.getCurrShape(),
+        };
+        const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data);
+        if (commandObj.canExecute()) {
+          commandObj.execute();
+        }
       }
-    }
-    this.setState({ tempFillColor: null });
+      this.setState({ tempFillColor: null });
+    });
   };
 
   render() {
