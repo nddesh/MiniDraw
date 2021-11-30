@@ -53,6 +53,10 @@ export default class ChangeBorderWidthCommandObject extends CommandObject {
    */
   canRepeat() {
     // Must have selected object
+    // The current selected shape should not be the same shape as in the command.
+    const currentWorkspaceShape = this.getWorkspaceObject();
+    const commamndShape = this.targetObject;
+    if (currentWorkspaceShape.id === commamndShape.id) return false;
     return this.getWorkspaceObject() !== null && this.getWorkspaceObject() !== undefined;
   }
 
