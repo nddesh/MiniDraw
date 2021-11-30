@@ -61,6 +61,7 @@ class WorkspaceRoute extends Component {
       getCurrShape: this.getCurrShape,
       updateShape: this.updateShape,
       selectShape: this.selectShape,
+      deleteSelectedShape: this.deleteSelectedShape,
     };
   }
 
@@ -124,14 +125,17 @@ class WorkspaceRoute extends Component {
     return this.state.currCommand < this.state.commandList.length - 1;
   };
   canRepeat = () => {
-    if (this.state.commandList.length <= 0 || this.state.currCommand !== this.state.commandList.length - 1) {
-      return false
+    if (
+      this.state.commandList.length <= 0 ||
+      this.state.currCommand !== this.state.commandList.length - 1
+    ) {
+      return false;
     } else {
       // return true
-      const latestCommand = this.state.commandList[this.state.commandList.length - 1]
-      return latestCommand.canRepeat()
+      const latestCommand = this.state.commandList[this.state.commandList.length - 1];
+      return latestCommand.canRepeat();
     }
-  }
+  };
 
   undo = () => {
     if (this.canUndo()) {
@@ -150,10 +154,11 @@ class WorkspaceRoute extends Component {
   };
 
   repeat = () => {
-    if(this.canRepeat()) {
-      const commandToRepeat = this.state.commandList[this.state.commandList.length - 1]
+    if (this.canRepeat()) {
+      const commandToRepeat = this.state.commandList[this.state.commandList.length - 1];
+      commandToRepeat.repeat();
     }
-  }
+  };
 
   selectShape = (id, data) => {
     const { borderColor, borderWidth, fillColor } = data || {};
@@ -251,16 +256,20 @@ class WorkspaceRoute extends Component {
    * ---------------------------------------------*/
 
   // deleting a shape sets its visibility to false, rather than removing it
-  deleteSelectedShape = () => {
+  deleteSelectedShape = ({ isRepeat }) => {
     let shapesMap = { ...this.state.shapesMap };
     shapesMap[this.state.selectedShapeId].visible = false;
     this.setState({ shapesMap, selectedShapeId: undefined });
 
     if (this.getCurrShape()) {
-      const commandObj = new DeleteShapeCommandObject(this.undoHandler, {
-        shape: this.getCurrShape(),
-        targetShape: this.getCurrShape(),
-      });
+      const commandObj = new DeleteShapeCommandObject(
+        this.undoHandler,
+        {
+          shape: this.getCurrShape(),
+          targetShape: this.getCurrShape(),
+        },
+        isRepeat
+      );
       if (commandObj.canExecute()) {
         commandObj.execute();
       }
@@ -271,8 +280,8 @@ class WorkspaceRoute extends Component {
    * CHANGE BORDER COLOR
    * ---------------------------------------------*/
   changeCurrBorderColor = (borderColor) => {
-    if(!this.state.tempBorderColor) {
-      this.startChangingBorderColor(borderColor)
+    if (!this.state.tempBorderColor) {
+      this.startChangingBorderColor(borderColor);
     }
 
     this.setState({ currBorderColor: borderColor });
@@ -287,8 +296,8 @@ class WorkspaceRoute extends Component {
     if (this.state.tempBorderColor !== this.state.currBorderColor && this.getCurrShape()) {
       const data = {
         oldValue: this.state.tempBorderColor,
-        newValue:  this.state.currBorderColor,
-        targetShape: this.getCurrShape()
+        newValue: this.state.currBorderColor,
+        targetShape: this.getCurrShape(),
       };
       const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data);
       if (commandObj.canExecute()) {
@@ -315,7 +324,7 @@ class WorkspaceRoute extends Component {
       const data = {
         oldValue: this.state.tempBorderWidth,
         newValue: borderWidth,
-        targetShape: this.getCurrShape()
+        targetShape: this.getCurrShape(),
       };
       const commandObj = new ChangeBorderWidthCommandObject(this.undoHandler, data);
       if (commandObj.canExecute()) {
@@ -329,8 +338,8 @@ class WorkspaceRoute extends Component {
    * CHANGE FILL COLOR
    * ---------------------------------------------*/
   changeCurrFillColor = (fillColor) => {
-    if(!this.state.tempFillColor) {
-      this.startChangingFillColor(fillColor)
+    if (!this.state.tempFillColor) {
+      this.startChangingFillColor(fillColor);
     }
     this.setState({ currFillColor: fillColor });
     if (this.state.selectedShapeId) {
@@ -400,7 +409,7 @@ class WorkspaceRoute extends Component {
             repeat: this.repeat,
             canUndo: this.canUndo(),
             canRedo: this.canRedo(),
-            canRepeat: this.canRepeat()
+            canRepeat: this.canRepeat(),
           }}
         >
           <Layers />
