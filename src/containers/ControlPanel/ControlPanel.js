@@ -84,15 +84,15 @@ const Modes = ({
   );
 };
 
-const ColorPicker = ({ title, currColor, setCurrColor, conflictColors }) => {
+const ColorPicker = ({ title, currColor, setCurrColor, stopChangeColor, conflictColors }) => {
   return (
     <div className="Control">
       <h3>{title}</h3>
       <div className="Modes">
       <input type="color" id="head" name="head"
         value={currColor}
+        onBlur={stopChangeColor}
         onChange = {(e) => {
-          console.log(currColor);
           if (
             !(
               document.getElementById('head').value === "transparent" &&
@@ -114,6 +114,7 @@ const BorderColor = ({
   currBorderColor,
   changeCurrBorderColor,
   currFillColor,
+  stopChangeBorderColor
 }) => {
   return (
     <ColorPicker
@@ -124,17 +125,19 @@ const BorderColor = ({
         currFillColor,
         currMode === "line" ? "transparent" : null,
       ]}
+      stopChangeColor={stopChangeBorderColor}
     />
   );
 };
 
-const FillColor = ({ currFillColor, changeCurrFillColor, currBorderColor }) => {
+const FillColor = ({ currFillColor, changeCurrFillColor, stopChangeFillColor, currBorderColor }) => {
   return (
     <ColorPicker
       title={"Fill color:"}
       currColor={currFillColor}
       setCurrColor={changeCurrFillColor}
       conflictColors={[currBorderColor]}
+      stopChangeColor={stopChangeFillColor}
     />
   );
 };
@@ -206,8 +209,10 @@ const ControlPanel = () => {
     changeCurrMode,
     currBorderColor,
     changeCurrBorderColor,
+    stopChangeBorderColor,
     currFillColor,
     changeCurrFillColor,
+    stopChangeFillColor,
     currBorderWidth,
     changeCurrBorderWidth,
     stopSlideBorderWidth,
@@ -233,6 +238,7 @@ const ControlPanel = () => {
         currBorderColor={currBorderColor}
         changeCurrBorderColor={changeCurrBorderColor}
         currFillColor={currFillColor}
+        stopChangeBorderColor={stopChangeBorderColor}
       />
       <BorderWidth
         currBorderWidth={currBorderWidth}
@@ -244,6 +250,7 @@ const ControlPanel = () => {
         currFillColor={currFillColor}
         changeCurrFillColor={changeCurrFillColor}
         currBorderColor={currBorderColor}
+        stopChangeFillColor={stopChangeFillColor}
       />
       <Delete
         selectedShapeId={selectedShapeId}
