@@ -61,6 +61,11 @@ class WorkspaceRoute extends Component {
       getCurrShape: this.getCurrShape,
       updateShape: this.updateShape,
       selectShape: this.selectShape,
+      deleteSelectedShape: this.deleteSelectedShape,
+      addShape: this.addShape,
+      changeBorderColor: this.changeBorderColor,
+      changeFillColor: this.changeFillColor,
+      changeBorderWidth: this.changeBorderWidth,
     };
   }
 
@@ -123,6 +128,18 @@ class WorkspaceRoute extends Component {
   canRedo = () => {
     return this.state.currCommand < this.state.commandList.length - 1;
   };
+  canRepeat = () => {
+    if (
+      this.state.commandList.length <= 0 ||
+      this.state.currCommand !== this.state.commandList.length - 1
+    ) {
+      return false;
+    } else {
+      // return true
+      const latestCommand = this.state.commandList[this.state.commandList.length - 1];
+      return latestCommand.canRepeat();
+    }
+  };
 
   undo = () => {
     if (this.canUndo()) {
@@ -137,6 +154,13 @@ class WorkspaceRoute extends Component {
       const commandToRedo = this.state.commandList[this.state.currCommand + 1];
       commandToRedo.redo();
       this.setState({ currCommand: this.state.currCommand + 1 });
+    }
+  };
+
+  repeat = () => {
+    if (this.canRepeat()) {
+      const commandToRepeat = this.state.commandList[this.state.commandList.length - 1];
+      commandToRepeat.repeat();
     }
   };
 
@@ -180,7 +204,7 @@ class WorkspaceRoute extends Component {
    * ADD SHAPE
    * ---------------------------------------------*/
   // add the shapeId to the array, and the shape itself to the map
-  addShape = (shapeData) => {
+  addShape = (shapeData, isRepeat) => {
     let shapes = [...this.state.shapes];
     let shapesMap = { ...this.state.shapesMap };
     const id = genId();
@@ -189,9 +213,10 @@ class WorkspaceRoute extends Component {
       id,
     };
     shapes.push(id);
-    this.setState({ shapes, shapesMap, selectedShapeId: id });
+    // this.setState({ shapes, shapesMap, selectedShapeId: id });
+    this.setState({ shapes, shapesMap });
     const data = { id, ...shapeData };
-    const commandObj = new AddShapeCommandObject(this.undoHandler, data);
+    const commandObj = new AddShapeCommandObject(this.undoHandler, data, isRepeat);
     if (commandObj.canExecute()) {
       commandObj.execute();
     }
@@ -216,9 +241,10 @@ class WorkspaceRoute extends Component {
       this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
     ) {
       const data = {
-        shape: this.getCurrShape,
+        shape: this.getCurrShape(),
         oldValue: this.state.tempShape,
         newValue: this.getCurrShape(),
+        targetShape: this.getCurrShape(),
       };
 
       const commandObj = new MoveShapeCommandObject(this.undoHandler, data);
@@ -235,15 +261,20 @@ class WorkspaceRoute extends Component {
    * ---------------------------------------------*/
 
   // deleting a shape sets its visibility to false, rather than removing it
-  deleteSelectedShape = () => {
+  deleteSelectedShape = (data, isRepeat) => {
     let shapesMap = { ...this.state.shapesMap };
     shapesMap[this.state.selectedShapeId].visible = false;
     this.setState({ shapesMap, selectedShapeId: undefined });
 
     if (this.getCurrShape()) {
-      const commandObj = new DeleteShapeCommandObject(this.undoHandler, {
-        shape: this.getCurrShape(),
-      });
+      const commandObj = new DeleteShapeCommandObject(
+        this.undoHandler,
+        {
+          shape: this.getCurrShape(),
+          targetShape: this.getCurrShape(),
+        },
+        isRepeat
+      );
       if (commandObj.canExecute()) {
         commandObj.execute();
       }
@@ -253,9 +284,25 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE BORDER COLOR
    * ---------------------------------------------*/
+  // Workaround to change fill color without using color picker
+  changeBorderColor = (borderColor, isRepeat) => {
+    const data = {
+      oldValue: this.state.currBorderColor,
+      newValue: borderColor,
+      targetShape: this.getCurrShape(),
+    };
+    const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data, isRepeat);
+    if (commandObj.canExecute()) {
+      commandObj.execute();
+    }
+
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { borderColor });
+    }
+  };
   changeCurrBorderColor = (borderColor) => {
-    if(!this.state.tempBorderColor) {
-      this.startChangingBorderColor(borderColor)
+    if (!this.state.tempBorderColor) {
+      this.startChangingBorderColor(borderColor);
     }
 
     this.setState({ currBorderColor: borderColor });
@@ -270,8 +317,8 @@ class WorkspaceRoute extends Component {
     if (this.state.tempBorderColor !== this.state.currBorderColor && this.getCurrShape()) {
       const data = {
         oldValue: this.state.tempBorderColor,
-        newValue:  this.state.currBorderColor,
-        targetShape: this.getCurrShape()
+        newValue: this.state.currBorderColor,
+        targetShape: this.getCurrShape(),
       };
       const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data);
       if (commandObj.canExecute()) {
@@ -284,6 +331,21 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE BORDER WIDTH
    * ---------------------------------------------*/
+  changeBorderWidth = (borderWidth, isRepeat) => {
+    const data = {
+      oldValue: this.state.currBorderWidth,
+      newValue: borderWidth,
+      targetShape: this.getCurrShape(),
+    };
+    const commandObj = new ChangeBorderWidthCommandObject(this.undoHandler, data, isRepeat);
+    if (commandObj.canExecute()) {
+      commandObj.execute();
+    }
+    this.setState({ currBorderWidth: borderWidth });
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { borderWidth });
+    }
+  };
   changeCurrBorderWidth = (borderWidth) => {
     this.setState({ currBorderWidth: borderWidth });
     if (this.state.selectedShapeId) {
@@ -298,7 +360,7 @@ class WorkspaceRoute extends Component {
       const data = {
         oldValue: this.state.tempBorderWidth,
         newValue: borderWidth,
-        targetShape: this.getCurrShape()
+        targetShape: this.getCurrShape(),
       };
       const commandObj = new ChangeBorderWidthCommandObject(this.undoHandler, data);
       if (commandObj.canExecute()) {
@@ -311,9 +373,25 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE FILL COLOR
    * ---------------------------------------------*/
+
+  // Workaround to change fill color without using color picker
+  changeFillColor = (fillColor, isRepeat) => {
+    const data = {
+      oldValue: this.state.currFillColor,
+      newValue: fillColor,
+      targetShape: this.getCurrShape(),
+    };
+    const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data, isRepeat);
+    if (commandObj.canExecute()) {
+      commandObj.execute();
+    }
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { fillColor });
+    }
+  };
   changeCurrFillColor = (fillColor) => {
-    if(!this.state.tempFillColor) {
-      this.startChangingFillColor(fillColor)
+    if (!this.state.tempFillColor) {
+      this.startChangingFillColor(fillColor);
     }
     this.setState({ currFillColor: fillColor });
     if (this.state.selectedShapeId) {
@@ -380,8 +458,10 @@ class WorkspaceRoute extends Component {
 
             undo: this.undo,
             redo: this.redo,
+            repeat: this.repeat,
             canUndo: this.canUndo(),
             canRedo: this.canRedo(),
+            canRepeat: this.canRepeat(),
           }}
         >
           <Layers />

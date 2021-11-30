@@ -2,13 +2,17 @@ import CommandObject from './CommandObject';
 import { COMMAND_TYPES } from './constants';
 
 export default class ChangeFillColorCommandObject extends CommandObject {
-  constructor(undoHandler, data) {
+  constructor(undoHandler, data, isRepeat) {
     super(undoHandler, true, { data, type: COMMAND_TYPES.CHANGE_FILL_COLOR });
+    this.getWorkspaceObject = undoHandler.getCurrShape;
     this.targetObject = data.targetShape;
     this.newValue = data.newValue; // color
     this.oldValue = data.oldValue; // color
-    // this.commandName = `Change ${this.targetObject.type} Fill Color to `;
+    this.commandName = `${isRepeat ? `[Repeat] ` : ''}Change ${
+      this.targetObject.type
+    } Fill Color to `;
     this.colorCode = this.newValue;
+    this.repeatAction = undoHandler.changeFillColor;
   }
 
   /* override to return true if this command can be executed,
@@ -49,7 +53,9 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    * current context
    */
   canRepeat() {
-    return this.targetObject !== null;
+    // Must have selected object
+    // TODO: Check if the object type is line => cannot repeat this
+    return this.getWorkspaceObject() !== null && this.getWorkspaceObject() !== undefined;
   }
 
   /* override to execute the operation again, this time possibly on
@@ -57,15 +63,6 @@ export default class ChangeFillColorCommandObject extends CommandObject {
    * selectedObject.
    */
   repeat() {
-    if (this.targetObject !== null) {
-      this.targetObject = this.targetObject; // get new selected obj
-      this.oldValue = this.targetObject.fillColor; // object's current color
-      // no change to newValue since reusing the same color
-      this.targetObject.fillColor = this.newValue; // actually change
-
-      // Note that this command object must be a NEW command object so it can be
-      // registered to put it onto the stack
-      if (this.addToUndoStack) this.undoHandler.registerExecution({ ...this });
-    }
+    this.repeatAction(this.newValue, true);
   }
 }
