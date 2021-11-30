@@ -62,6 +62,7 @@ class WorkspaceRoute extends Component {
       updateShape: this.updateShape,
       selectShape: this.selectShape,
       deleteSelectedShape: this.deleteSelectedShape,
+      addShape: this.addShape,
     };
   }
 
@@ -200,7 +201,7 @@ class WorkspaceRoute extends Component {
    * ADD SHAPE
    * ---------------------------------------------*/
   // add the shapeId to the array, and the shape itself to the map
-  addShape = (shapeData) => {
+  addShape = (shapeData, isRepeat) => {
     let shapes = [...this.state.shapes];
     let shapesMap = { ...this.state.shapesMap };
     const id = genId();
@@ -209,9 +210,10 @@ class WorkspaceRoute extends Component {
       id,
     };
     shapes.push(id);
-    this.setState({ shapes, shapesMap, selectedShapeId: id });
+    // this.setState({ shapes, shapesMap, selectedShapeId: id });
+    this.setState({ shapes, shapesMap });
     const data = { id, ...shapeData };
-    const commandObj = new AddShapeCommandObject(this.undoHandler, data);
+    const commandObj = new AddShapeCommandObject(this.undoHandler, data, isRepeat);
     if (commandObj.canExecute()) {
       commandObj.execute();
     }

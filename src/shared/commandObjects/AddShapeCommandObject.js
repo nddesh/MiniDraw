@@ -2,11 +2,13 @@ import CommandObject from './CommandObject';
 import { COMMAND_TYPES } from './constants';
 
 export default class AddShapeCommandObject extends CommandObject {
-  constructor(undoHandler, data) {
+  constructor(undoHandler, data, isRepeat) {
     super(undoHandler, true, { data, type: COMMAND_TYPES.ADD_SHAPE });
+    this.getWorkspaceObject = undoHandler.getCurrShape;
     this.data = data;
     this.selectedObj = data;
-    this.commandName = `Create ${data.type}`;
+    this.commandName = `${isRepeat ? `[Repeat] ` : ''}Create ${data.type}`;
+    this.repeatAction = undoHandler.addShape;
   }
 
   /* override to return true if this command can be executed,
@@ -57,7 +59,7 @@ export default class AddShapeCommandObject extends CommandObject {
    * current context
    */
   canRepeat() {
-    return this.selectedObj !== null;
+    return !this.getWorkspaceObject();
   }
 
   /* override to execute the operation again, this time possibly on
@@ -65,15 +67,12 @@ export default class AddShapeCommandObject extends CommandObject {
    * selectedObject.
    */
   repeat() {
-    if (this.selectedObj !== null) {
-      this.targetObject = this.selectedObj; // get new selected obj
-      this.oldValue = this.selectedObj.fillColor; // object's current color
-      // no change to newValue since reusing the same color
-      this.selectedObj.fillColor = this.newValue; // actually change
-
-      // Note that this command object must be a NEW command object so it can be
-      // registered to put it onto the stack
-      if (this.addToUndoStack) this.undoHandler.registerExecution({ ...this });
-    }
+    const { id, finalCoords, initCoords, ...restData } = this.data;
+    const newData = {
+      ...restData,
+      finalCoords: { x: this.data.finalCoords.x + 10, y: this.data.finalCoords.y + 10 },
+      initCoords: { x: this.data.initCoords.x + 10, y: this.data.initCoords.y + 10 },
+    };
+    this.repeatAction(newData, true);
   }
 }
