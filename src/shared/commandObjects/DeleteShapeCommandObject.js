@@ -4,7 +4,7 @@ import { COMMAND_TYPES } from './constants';
 export default class DeleteShapeCommandObject extends CommandObject {
   constructor(undoHandler, data) {
     super(undoHandler, true, { data, type: COMMAND_TYPES.DELETE_SHAPE });
-    this.targetObject = undoHandler.getCurrShape();
+    this.targetObject = data.targetShape;
     this.commandName = `Delete ${this.targetObject.type}`;
   }
 

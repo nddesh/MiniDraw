@@ -1,5 +1,6 @@
 // you will need to MODIFY this and other files to make them work with command objects, 
 // instead of directly performing the actions
+import { repeat } from "lodash";
 import React, { useContext } from "react";
 
 import { FaTrash } from "react-icons/fa";
@@ -184,7 +185,7 @@ const Delete = ({ selectedShapeId, deleteSelectedShape }) => {
   );
 };
 
-const UndoRedo = ({ undo, redo, disableUndo, disableRedo }) => {
+const UndoRedo = ({ undo, redo, repeat, disableUndo, disableRedo, canRepeat }) => {
   return (
     <div className="Control">
       <h3>Undo / Redo:</h3>
@@ -193,10 +194,15 @@ const UndoRedo = ({ undo, redo, disableUndo, disableRedo }) => {
           <ImUndo className="ButtonIcon" />
           Undo
         </button>
-        <button disabled={disableRedo} onClick={() => redo()}>
-          <ImRedo className="ButtonIcon" />
-          Redo
-        </button>
+        {disableRedo && canRepeat
+          ?
+          <button onClick={() => repeat()}>Repeat</button>
+          :
+          <button disabled={disableRedo} onClick={() => redo()}>
+            <ImRedo className="ButtonIcon" />
+            Redo
+          </button>
+        }
       </div>
     </div>
   );
@@ -222,8 +228,10 @@ const ControlPanel = () => {
     deleteSelectedShape,
     undo,
     redo,
+    repeat,
     canUndo,
     canRedo,
+    canRepeat,
   } = useContext(ControlContext);
 
   return (
@@ -258,7 +266,7 @@ const ControlPanel = () => {
         selectedShapeId={selectedShapeId}
         deleteSelectedShape={deleteSelectedShape}
       />
-      <UndoRedo undo={undo} redo={redo} disableUndo={!canUndo} disableRedo={!canRedo} />
+      <UndoRedo undo={undo} redo={redo} repeat={repeat} disableUndo={!canUndo} disableRedo={!canRedo} canRepeat={canRepeat} />
     </div>
   );
 };

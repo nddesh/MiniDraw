@@ -123,6 +123,15 @@ class WorkspaceRoute extends Component {
   canRedo = () => {
     return this.state.currCommand < this.state.commandList.length - 1;
   };
+  canRepeat = () => {
+    if (this.state.commandList.length <= 0 || this.state.currCommand !== this.state.commandList.length - 1) {
+      return false
+    } else {
+      return true
+      // const latestCommand = this.state.commandList[this.state.commandList.length - 1]
+      // return latestCommand.canRepeat()
+    }
+  }
 
   undo = () => {
     if (this.canUndo()) {
@@ -139,6 +148,10 @@ class WorkspaceRoute extends Component {
       this.setState({ currCommand: this.state.currCommand + 1 });
     }
   };
+
+  repeat = () => {
+    console.log('repeat')
+  }
 
   selectShape = (id, data) => {
     const { borderColor, borderWidth, fillColor } = data || {};
@@ -243,6 +256,7 @@ class WorkspaceRoute extends Component {
     if (this.getCurrShape()) {
       const commandObj = new DeleteShapeCommandObject(this.undoHandler, {
         shape: this.getCurrShape(),
+        targetShape: this.getCurrShape(),
       });
       if (commandObj.canExecute()) {
         commandObj.execute();
@@ -380,8 +394,10 @@ class WorkspaceRoute extends Component {
 
             undo: this.undo,
             redo: this.redo,
+            repeat: this.repeat,
             canUndo: this.canUndo(),
             canRedo: this.canRedo(),
+            canRepeat: this.canRepeat()
           }}
         >
           <Layers />
