@@ -127,9 +127,9 @@ class WorkspaceRoute extends Component {
     if (this.state.commandList.length <= 0 || this.state.currCommand !== this.state.commandList.length - 1) {
       return false
     } else {
-      return true
-      // const latestCommand = this.state.commandList[this.state.commandList.length - 1]
-      // return latestCommand.canRepeat()
+      // return true
+      const latestCommand = this.state.commandList[this.state.commandList.length - 1]
+      return latestCommand.canRepeat()
     }
   }
 
@@ -150,7 +150,9 @@ class WorkspaceRoute extends Component {
   };
 
   repeat = () => {
-    console.log('repeat')
+    if(this.canRepeat()) {
+      const commandToRepeat = this.state.commandList[this.state.commandList.length - 1]
+    }
   }
 
   selectShape = (id, data) => {
@@ -229,9 +231,10 @@ class WorkspaceRoute extends Component {
       this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
     ) {
       const data = {
-        shape: this.getCurrShape,
+        shape: this.getCurrShape(),
         oldValue: this.state.tempShape,
         newValue: this.getCurrShape(),
+        targetShape: this.getCurrShape(),
       };
 
       const commandObj = new MoveShapeCommandObject(this.undoHandler, data);
