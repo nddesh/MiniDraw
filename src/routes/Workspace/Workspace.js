@@ -65,6 +65,7 @@ class WorkspaceRoute extends Component {
       addShape: this.addShape,
       changeBorderColor: this.changeBorderColor,
       changeFillColor: this.changeFillColor,
+      changeBorderWidth: this.changeBorderWidth,
     };
   }
 
@@ -330,6 +331,21 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE BORDER WIDTH
    * ---------------------------------------------*/
+  changeBorderWidth = (borderWidth, isRepeat) => {
+    const data = {
+      oldValue: this.state.currBorderWidth,
+      newValue: borderWidth,
+      targetShape: this.getCurrShape(),
+    };
+    const commandObj = new ChangeBorderWidthCommandObject(this.undoHandler, data, isRepeat);
+    if (commandObj.canExecute()) {
+      commandObj.execute();
+    }
+    this.setState({ currBorderWidth: borderWidth });
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { borderWidth });
+    }
+  };
   changeCurrBorderWidth = (borderWidth) => {
     this.setState({ currBorderWidth: borderWidth });
     if (this.state.selectedShapeId) {
@@ -360,8 +376,6 @@ class WorkspaceRoute extends Component {
 
   // Workaround to change fill color without using color picker
   changeFillColor = (fillColor, isRepeat) => {
-    console.log(fillColor);
-    console.log(this.getCurrShape());
     const data = {
       oldValue: this.state.currFillColor,
       newValue: fillColor,
