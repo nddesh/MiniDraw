@@ -92,10 +92,10 @@ class WorkspaceRoute extends Component {
       this.props.updateWorkspaceData(this.props.workspaceId, {
         shapes: this.state.shapes,
         shapesMap: this.state.shapesMap,
-        commandList: this.state.commandList.map((command) => {
-          return command.getDataForSave();
-        }),
-        currCommand: this.state.currCommand,
+        // commandList: this.state.commandList.map((command) => {
+        //   return command.getDataForSave();
+        // }),
+        // currCommand: this.state.currCommand,
       });
     }
   }
