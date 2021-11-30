@@ -63,6 +63,8 @@ class WorkspaceRoute extends Component {
       selectShape: this.selectShape,
       deleteSelectedShape: this.deleteSelectedShape,
       addShape: this.addShape,
+      changeBorderColor: this.changeBorderColor,
+      changeFillColor: this.changeFillColor,
     };
   }
 
@@ -258,7 +260,7 @@ class WorkspaceRoute extends Component {
    * ---------------------------------------------*/
 
   // deleting a shape sets its visibility to false, rather than removing it
-  deleteSelectedShape = ({ isRepeat }) => {
+  deleteSelectedShape = (data, isRepeat) => {
     let shapesMap = { ...this.state.shapesMap };
     shapesMap[this.state.selectedShapeId].visible = false;
     this.setState({ shapesMap, selectedShapeId: undefined });
@@ -281,6 +283,22 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE BORDER COLOR
    * ---------------------------------------------*/
+  // Workaround to change fill color without using color picker
+  changeBorderColor = (borderColor, isRepeat) => {
+    const data = {
+      oldValue: this.state.currBorderColor,
+      newValue: borderColor,
+      targetShape: this.getCurrShape(),
+    };
+    const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data, isRepeat);
+    if (commandObj.canExecute()) {
+      commandObj.execute();
+    }
+
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { borderColor });
+    }
+  };
   changeCurrBorderColor = (borderColor) => {
     if (!this.state.tempBorderColor) {
       this.startChangingBorderColor(borderColor);
@@ -339,6 +357,24 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE FILL COLOR
    * ---------------------------------------------*/
+
+  // Workaround to change fill color without using color picker
+  changeFillColor = (fillColor, isRepeat) => {
+    console.log(fillColor);
+    console.log(this.getCurrShape());
+    const data = {
+      oldValue: this.state.currFillColor,
+      newValue: fillColor,
+      targetShape: this.getCurrShape(),
+    };
+    const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data, isRepeat);
+    if (commandObj.canExecute()) {
+      commandObj.execute();
+    }
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { fillColor });
+    }
+  };
   changeCurrFillColor = (fillColor) => {
     if (!this.state.tempFillColor) {
       this.startChangingFillColor(fillColor);

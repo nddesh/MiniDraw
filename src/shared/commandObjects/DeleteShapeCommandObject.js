@@ -61,6 +61,6 @@ export default class DeleteShapeCommandObject extends CommandObject {
     return this.getWorkspaceObject() !== null && this.getWorkspaceObject() !== undefined;
   }
   repeat() {
-    this.repeatAction({ isRepeat: true });
+    this.repeatAction({}, true);
   }
 }
