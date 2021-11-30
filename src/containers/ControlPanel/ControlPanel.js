@@ -26,7 +26,7 @@ const Modes = ({
       <h3>Mode:</h3>
       <div className="Modes">
         <div
-          className={["Mode", (currMode === "select"  || currMode === "line") ? "Active" : null].join(
+          className={["Mode", (currMode === "select") ? "Active" : null].join(
             " "
           )}
           onClick={() => changeCurrMode("select")}
@@ -70,13 +70,13 @@ const Modes = ({
         </div>
         <div
           className={["Mode", currMode === "polygon" ? "Active" : null].join(" ")}
-          onClick={() => changeCurrMode("polygon")}
+          onClick={() => {changeCurrMode("polygon"); selectShape(undefined)}}
         >
           <img src={PolygonImg} alt="polygon" />
         </div>
         <div
           className={["Mode", currMode === "text" ? "Active" : null].join(" ")}
-          onClick={() => changeCurrMode("text")}
+          onClick={() => {changeCurrMode("text"); selectShape(undefined)}}
         >
           <img src={TextImg} alt="text" />
         </div>
@@ -155,7 +155,7 @@ const BorderWidth = ({ currBorderWidth, changeCurrBorderWidth, stopSlideBorderWi
           onChange={(e) => changeCurrBorderWidth(e.target.value)}
           onMouseDown={(e) => startSlideBorderWidth(e.target.value)}
           onMouseUp={(e) => stopSlideBorderWidth(e.target.value)}
-          min={1}
+          min={0}
           max={30}
           value={currBorderWidth}
         />
@@ -165,6 +165,28 @@ const BorderWidth = ({ currBorderWidth, changeCurrBorderWidth, stopSlideBorderWi
     </div>
   );
 };
+
+const VertexCount = ({ currVertexCount, changeCurrVertexCount, currMode }) => {
+  return (
+    <div className="Control">
+      <h3>Vertex count:</h3>
+          <div className="VertexCountButtonsContainer">
+            <button
+              className="VertexCountButton"
+              onClick={() => changeCurrVertexCount(currVertexCount - 1)}
+              disabled={currVertexCount === 3}
+            >-</button>
+            <span>{currVertexCount}</span>
+            <button
+              className="VertexCountButton"
+              onClick={() => changeCurrVertexCount(currVertexCount + 1)}
+              disabled={currVertexCount === 20}
+            >+</button>
+          </div>
+    </div>
+  );
+};
+
 
 const Delete = ({ selectedShapeId, deleteSelectedShape }) => {
   return (
@@ -218,6 +240,8 @@ const ControlPanel = () => {
     stopChangeBorderColor,
     currFillColor,
     changeCurrFillColor,
+    currVertexCount,
+    changeCurrVertexCount,
     stopChangeFillColor,
     currBorderWidth,
     changeCurrBorderWidth,
@@ -226,6 +250,7 @@ const ControlPanel = () => {
     selectedShapeId,
     selectShape,
     deleteSelectedShape,
+    shapesMap,
     undo,
     redo,
     repeat,
@@ -236,6 +261,7 @@ const ControlPanel = () => {
 
   return (
     <div className="ControlPanel">
+
       <Modes
         currMode={currMode}
         changeCurrMode={changeCurrMode}
@@ -243,6 +269,13 @@ const ControlPanel = () => {
         currFillColor={currFillColor}
         selectShape={selectShape}
       />
+      { (currMode === "select" && selectedShapeId && shapesMap[selectedShapeId]?.type && shapesMap[selectedShapeId].type === "polygon") ? (
+        <VertexCount
+          currVertexCount={currVertexCount}
+          changeCurrVertexCount={changeCurrVertexCount}
+          currmode={currMode}
+        />
+        ) : null}
       <BorderColor
         currMode={currMode}
         currBorderColor={currBorderColor}

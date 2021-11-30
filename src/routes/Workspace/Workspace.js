@@ -31,11 +31,14 @@ class WorkspaceRoute extends Component {
     currBorderColor: defaultValues.borderColor,
     currBorderWidth: defaultValues.borderWidth,
     currFillColor: defaultValues.fillColor,
+    currVertexCount: 3,
+    //defaultValues.vertexCount 
 
     tempBorderWidth: null,
     tempFillColor: null,
     tempBorderColor: null,
     tempShape: null,
+    //tempVertexCount: null,
 
     // workspace
     shapes: [],
@@ -59,6 +62,7 @@ class WorkspaceRoute extends Component {
 
   constructor() {
     super();
+    
 
     this.undoHandler = {
       registerExecution: this.registerExecution,
@@ -190,18 +194,20 @@ class WorkspaceRoute extends Component {
   };
 
   selectShape = (id, data) => {
-    const { borderColor, borderWidth, fillColor } = data || {};
+    const { borderColor, borderWidth, fillColor, vertexCount } = data || {};
     this.setState({ selectedShapeId: id });
     if (id) {
       const {
         borderColor: currBorderColor,
         borderWidth: currBorderWidth,
         fillColor: currFillColor,
+        vertexCount: currVertexCount,
       } = this.state.shapesMap[this.state.shapes.filter((shapeId) => shapeId === id)[0]];
       this.setState({
         currBorderColor: borderColor ? borderColor : currBorderColor,
         currBorderWidth: borderWidth ? borderWidth : currBorderWidth,
         currFillColor: fillColor ? fillColor : currFillColor,
+        currVertexCount: vertexCount ? vertexCount : currVertexCount,
       });
     }
   };
@@ -290,6 +296,39 @@ class WorkspaceRoute extends Component {
       this.setState({ tempShape: null });
     });
   };
+
+    /**---------------------------------------------
+   * RESIZE SHAPE
+   * ---------------------------------------------*/
+    resizeShape = (newData) => {
+      if (this.state.selectedShapeId) {
+        this.updateShape(this.state.selectedShapeId, newData);
+      }
+    };
+    startResizeShape = (id) => {
+      // let shapesMap = { ...this.state.shapesMap };
+      // this.setState({ tempShape: shapesMap[id] });
+    };
+    stopResizeShape = () => {
+      // if (
+      //   this.state.tempShape &&
+      //   this.getCurrShape() &&
+      //   this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
+      // ) {
+      //   const data = {
+      //     shape: this.getCurrShape,
+      //     oldValue: this.state.tempShape,
+      //     newValue: this.getCurrShape(),
+      //   };
+  
+        // const commandObj = new ResizeShapeCommandObject(this.undoHandler, data);
+        // if (commandObj.canExecute()) {
+        //   commandObj.execute();
+        // }
+      //}
+  
+      // this.setState({ tempShape: null });
+    };
 
   /**---------------------------------------------
    * DELETE SHAPE
@@ -462,6 +501,40 @@ class WorkspaceRoute extends Component {
       this.setState({ tempFillColor: null });
     });
   };
+  /**---------------------------------------------
+   * CHANGE VERTEX COUNT
+   * ---------------------------------------------*/
+  changeCurrVertexCount = (vertexCount) => {
+    // if(!this.state.tempVertexCount) {
+    //   this.startChangingVertexCount(vertexCount)
+    // }
+
+    this.setState({ currVertexCount: vertexCount });
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { vertexCount });
+    }
+  };
+  // startChangingVertexCount = (vertexCount) => {
+  //   this.setState({ tempVertexCount: vertexCount });
+  // };
+  // stopChangingVertexCount = () => {
+  //   if (this.state.tempVertexCount && this.state.currVertexCount && this.getCurrShape()) {
+  //     const data = {
+  //       oldValue: this.state.tempVertexCount,
+  //       newValue: this.state.currVertexCount,
+  //       targetShape: this.getCurrShape(),
+  //     };
+  //     const commandObj = new ChangeVertexCountCommandObject(this.undoHandler, data);
+  //     if (commandObj.canExecute()) {
+  //       commandObj.execute();
+  //     }
+  //   }
+  //   this.setState({ tempVertexCount: null });
+  // };
+
+  /**---------------------------------------------
+   * RENDER
+   * ---------------------------------------------*/
 
   render() {
     const {
@@ -469,6 +542,7 @@ class WorkspaceRoute extends Component {
       currBorderColor,
       currBorderWidth,
       currFillColor,
+      currVertexCount,
       shapes,
       shapesMap,
       selectedShapeId,
@@ -491,6 +565,9 @@ class WorkspaceRoute extends Component {
             currFillColor,
             changeCurrFillColor: this.changeCurrFillColor,
             stopChangeFillColor: this.stopChangingFillColor,
+            currVertexCount,
+            changeCurrVertexCount: this.changeCurrVertexCount,
+
 
             shapes,
             shapesMap,
@@ -500,6 +577,9 @@ class WorkspaceRoute extends Component {
             stopMoveShape: this.stopMoveShape,
             selectedShapeId,
             selectShape: this.selectShape,
+            resizeShape: this.resizeShape,
+            startResizeShape: this.startResizeShape,
+            stopResizeShape: this.stopResizeShape,
 
             deleteSelectedShape: this.deleteSelectedShape,
 
@@ -511,7 +591,10 @@ class WorkspaceRoute extends Component {
             canRepeat: this.canRepeat(),
           }}
         >
-          <Layers />
+          <Layers 
+            objects={this.state.shapes}
+            shapesMap={this.state.shapesMap}
+          />
 
           <Workspace />
           <ControlPanel />

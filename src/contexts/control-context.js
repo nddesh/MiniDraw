@@ -10,6 +10,8 @@ const controlContext = createContext({
   changeCurrBorderWidth: () => {},
   currFillColor: "",
   changeCurrFillColor: () => {},
+  currVertexCount: 3,
+  changeCurrVertexCount: () => {},
 
   shapes: [],
   shapesMap: {},

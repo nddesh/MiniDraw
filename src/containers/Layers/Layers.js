@@ -4,13 +4,29 @@ import React, { useContext } from "react";
 
 import "../Layers/Layers.css";
 
+const ListItem = ({type, index }) => {
+  return (
+    <div>
+      {type}{' '}
+      {index}
+    </div>
+  );
+};
 
-const Layers = () => {
+const Layers = ({objects =[], shapesMap={}}) => {
   // use useContext to access the functions & values from the provider
+  // console.log(objects, shapesMap);
   return (
     <div className="Layers">
-      <p>Layer 1</p>
-      <p>Layer 2</p>
+      {objects.map((id, index) => {
+        const object = shapesMap[id];
+        return (
+          <ListItem
+            type={object.type}
+            index={index}
+          />
+        );
+      })}
     </div>
   );
 };
