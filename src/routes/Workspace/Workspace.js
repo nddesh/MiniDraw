@@ -262,29 +262,33 @@ class WorkspaceRoute extends Component {
     }
   };
   startMoveShape = (id) => {
-    let shapesMap = { ...this.state.shapesMap };
-    this.setState({ tempShape: shapesMap[id] });
+    this.disableUpdateFirestore(() => {
+      let shapesMap = { ...this.state.shapesMap };
+      this.setState({ tempShape: shapesMap[id] });
+    });
   };
   stopMoveShape = () => {
-    if (
-      this.state.tempShape &&
-      this.getCurrShape() &&
-      this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
-    ) {
-      const data = {
-        shape: this.getCurrShape(),
-        oldValue: this.state.tempShape,
-        newValue: this.getCurrShape(),
-        targetShape: this.getCurrShape(),
-      };
+    this.enableUpdateFirestore(() => {
+      if (
+        this.state.tempShape &&
+        this.getCurrShape() &&
+        this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
+      ) {
+        const data = {
+          shape: this.getCurrShape(),
+          oldValue: this.state.tempShape,
+          newValue: this.getCurrShape(),
+          targetShape: this.getCurrShape(),
+        };
 
-      const commandObj = new MoveShapeCommandObject(this.undoHandler, data);
-      if (commandObj.canExecute()) {
-        commandObj.execute();
+        const commandObj = new MoveShapeCommandObject(this.undoHandler, data);
+        if (commandObj.canExecute()) {
+          commandObj.execute();
+        }
       }
-    }
 
-    this.setState({ tempShape: null });
+      this.setState({ tempShape: null });
+    });
   };
 
   /**---------------------------------------------
