@@ -20,6 +20,7 @@ import ChangeBorderWidthCommandObject from '../../shared/commandObjects/ChangeBo
 import MoveShapeCommandObject from '../../shared/commandObjects/MoveShapeCommandObject';
 
 import { addEventListeners } from './utils';
+import { FaTextHeight } from 'react-icons/fa';
 
 class WorkspaceRoute extends Component {
   state = {
@@ -30,6 +31,8 @@ class WorkspaceRoute extends Component {
     currFillColor: defaultValues.fillColor,
 
     tempBorderWidth: null,
+    tempFillColor: null,
+    tempBorderColor: null,
     tempShape: null,
 
     // workspace
@@ -251,10 +254,23 @@ class WorkspaceRoute extends Component {
    * CHANGE BORDER COLOR
    * ---------------------------------------------*/
   changeCurrBorderColor = (borderColor) => {
-    if (borderColor !== this.state.currBorderColor && this.getCurrShape()) {
+    if(!this.state.tempBorderColor) {
+      this.startChangingBorderColor(borderColor)
+    }
+
+    this.setState({ currBorderColor: borderColor });
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { borderColor });
+    }
+  };
+  startChangingBorderColor = (borderColor) => {
+    this.setState({ tempBorderColor: borderColor });
+  };
+  stopChangingBorderColor = () => {
+    if (this.state.tempBorderColor !== this.state.currBorderColor && this.getCurrShape()) {
       const data = {
-        oldValue: this.state.currBorderColor,
-        newValue: borderColor,
+        oldValue: this.state.tempBorderColor,
+        newValue:  this.state.currBorderColor,
         targetShape: this.getCurrShape()
       };
       const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data);
@@ -262,11 +278,7 @@ class WorkspaceRoute extends Component {
         commandObj.execute();
       }
     }
-
-    this.setState({ currBorderColor: borderColor });
-    if (this.state.selectedShapeId) {
-      this.updateShape(this.state.selectedShapeId, { borderColor });
-    }
+    this.setState({ tempFillColor: null });
   };
 
   /**---------------------------------------------
@@ -300,10 +312,22 @@ class WorkspaceRoute extends Component {
    * CHANGE FILL COLOR
    * ---------------------------------------------*/
   changeCurrFillColor = (fillColor) => {
-    if (fillColor !== this.state.currFillColor && this.getCurrShape()) {
+    if(!this.state.tempFillColor) {
+      this.startChangingFillColor(fillColor)
+    }
+    this.setState({ currFillColor: fillColor });
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { fillColor });
+    }
+  };
+  startChangingFillColor = (fillColor) => {
+    this.setState({ tempFillColor: fillColor });
+  };
+  stopChangingFillColor = () => {
+    if (this.state.tempFillColor && this.state.currFillColor && this.getCurrShape()) {
       const data = {
-        oldValue: this.state.currFillColor,
-        newValue: fillColor,
+        oldValue: this.state.tempFillColor,
+        newValue: this.state.currFillColor,
         targetShape: this.getCurrShape(),
       };
       const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data);
@@ -311,11 +335,7 @@ class WorkspaceRoute extends Component {
         commandObj.execute();
       }
     }
-
-    this.setState({ currFillColor: fillColor });
-    if (this.state.selectedShapeId) {
-      this.updateShape(this.state.selectedShapeId, { fillColor });
-    }
+    this.setState({ tempFillColor: null });
   };
 
   render() {
@@ -338,12 +358,14 @@ class WorkspaceRoute extends Component {
             changeCurrMode: this.changeCurrMode,
             currBorderColor,
             changeCurrBorderColor: this.changeCurrBorderColor,
+            stopChangeBorderColor: this.stopChangingBorderColor,
             currBorderWidth,
             changeCurrBorderWidth: this.changeCurrBorderWidth,
             startSlideBorderWidth: this.startSlideBorderWidth,
             stopSlideBorderWidth: this.stopSlideBorderWidth,
             currFillColor,
             changeCurrFillColor: this.changeCurrFillColor,
+            stopChangeFillColor: this.stopChangingFillColor,
 
             shapes,
             shapesMap,
