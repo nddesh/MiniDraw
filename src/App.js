@@ -7,7 +7,7 @@ import Home from './routes/Home';
 import Workspaces from './routes/Workspaces';
 import Workspace from './routes/Workspace';
 
-import { firebaseConfig } from './config';
+import { firebaseConfig } from './config.js';
 
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';

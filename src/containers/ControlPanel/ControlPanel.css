@@ -99,3 +99,10 @@
   border: 1px solid lightgray;
   user-select: none;
 }
+
+.VertexCountButton {
+  margin-right: 10px;
+  margin-left: 10px;
+  width: 25px;
+  height: 25px;
+}

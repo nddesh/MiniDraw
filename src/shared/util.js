@@ -12,4 +12,5 @@ export const defaultValues = {
   borderColor: "#000",
   borderWidth: 3,
   fillColor: "#9fce63",
+  vertextCount: 3,
 };

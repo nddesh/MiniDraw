@@ -18,3 +18,16 @@
   top: 0px;
   left: 0px;
 }
+
+.textarea {
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 1px 6px;
+  display: block;
+  overflow: hidden;
+  resize: both;
+  max-width: 300px;
+  max-height: 200px;
+}
+
