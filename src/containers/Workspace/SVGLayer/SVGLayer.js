@@ -65,7 +65,7 @@ const SVGLayer = () => {
       } else {
         if (e.target.className?.baseVal === "selectionGroup") {
           // resize 
-          console.log("resize");
+          // console.log("resize");
           setResizing(true);
           setMouseDownPoint({
             x: e.nativeEvent.offsetX,

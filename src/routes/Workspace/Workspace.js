@@ -591,7 +591,10 @@ class WorkspaceRoute extends Component {
             canRepeat: this.canRepeat(),
           }}
         >
-          <Layers />
+          <Layers 
+            objects={this.state.shapes}
+            shapesMap={this.state.shapesMap}
+          />
 
           <Workspace />
           <ControlPanel />
