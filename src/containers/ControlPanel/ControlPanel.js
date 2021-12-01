@@ -1,47 +1,42 @@
-// you will need to MODIFY this and other files to make them work with command objects, 
+// you will need to MODIFY this and other files to make them work with command objects,
 // instead of directly performing the actions
-import { repeat } from "lodash";
-import React, { useContext } from "react";
+import { repeat } from 'lodash';
+import React, { useContext } from 'react';
 
-import { FaTrash } from "react-icons/fa";
-import { ImUndo, ImRedo } from "react-icons/im";
+import { FaTrash } from 'react-icons/fa';
+import { ImUndo, ImRedo } from 'react-icons/im';
 
-import CursorImg from "../../assets/img/cursor.png";
-import LineImg from "../../assets/img/line.png";
-import PolygonImg from "../../assets/img/polygon.png";
-import TextImg from "../../assets/img/text.png";
-import ControlContext from "../../contexts/control-context";
+import CursorImg from '../../assets/img/cursor.png';
+import LineImg from '../../assets/img/line.png';
+import PolygonImg from '../../assets/img/polygon.png';
+import TextImg from '../../assets/img/text.png';
+import ControlContext from '../../contexts/control-context';
 
-import "./ControlPanel.css";
+import './ControlPanel.css';
 
-const Modes = ({
-  currMode,
-  changeCurrMode,
-  currBorderColor,
-  currFillColor,
-  selectShape
-}) => {
+const Modes = ({ currMode, changeCurrMode, currBorderColor, currFillColor, selectShape }) => {
   return (
     <div className="Control">
       <h3>Mode:</h3>
       <div className="Modes">
         <div
-          className={["Mode", (currMode === "select") ? "Active" : null].join(
-            " "
-          )}
-          onClick={() => changeCurrMode("select")}
+          className={['Mode', currMode === 'select' ? 'Active' : null].join(' ')}
+          onClick={() => changeCurrMode('select')}
         >
           <img src={CursorImg} alt="cursor" />
         </div>
         <div
-          className={["Mode", currMode === "line" ? "Active" : null].join(" ")}
-          onClick={() => changeCurrMode("line")}
+          className={['Mode', currMode === 'line' ? 'Active' : null].join(' ')}
+          onClick={() => changeCurrMode('line')}
         >
           <img src={LineImg} alt="line" />
         </div>
         <div
-          className={["Mode", currMode === "rect" ? "Active" : null].join(" ")}
-          onClick={() => {changeCurrMode("rect"); selectShape(undefined)}}
+          className={['Mode', currMode === 'rect' ? 'Active' : null].join(' ')}
+          onClick={() => {
+            changeCurrMode('rect');
+            selectShape(undefined);
+          }}
         >
           <div
             style={{
@@ -53,10 +48,11 @@ const Modes = ({
           ></div>
         </div>
         <div
-          className={["Mode", currMode === "ellipse" ? "Active" : null].join(
-            " "
-          )}
-          onClick={() => {changeCurrMode("ellipse"); selectShape(undefined)}}
+          className={['Mode', currMode === 'ellipse' ? 'Active' : null].join(' ')}
+          onClick={() => {
+            changeCurrMode('ellipse');
+            selectShape(undefined);
+          }}
         >
           <div
             style={{
@@ -64,19 +60,25 @@ const Modes = ({
               width: 36,
               height: 20,
               border: `2px solid ${currBorderColor}`,
-              borderRadius: "50%",
+              borderRadius: '50%',
             }}
           ></div>
         </div>
         <div
-          className={["Mode", currMode === "polygon" ? "Active" : null].join(" ")}
-          onClick={() => {changeCurrMode("polygon"); selectShape(undefined)}}
+          className={['Mode', currMode === 'polygon' ? 'Active' : null].join(' ')}
+          onClick={() => {
+            changeCurrMode('polygon');
+            selectShape(undefined);
+          }}
         >
           <img src={PolygonImg} alt="polygon" />
         </div>
         <div
-          className={["Mode", currMode === "text" ? "Active" : null].join(" ")}
-          onClick={() => {changeCurrMode("text"); selectShape(undefined)}}
+          className={['Mode', currMode === 'text' ? 'Active' : null].join(' ')}
+          onClick={() => {
+            changeCurrMode('text');
+            selectShape(undefined);
+          }}
         >
           <img src={TextImg} alt="text" />
         </div>
@@ -90,23 +92,27 @@ const ColorPicker = ({ title, currColor, setCurrColor, stopChangeColor, conflict
     <div className="Control">
       <h3>{title}</h3>
       <div className="Modes">
-      <input type="color" id="head" name="head"
-        value={currColor}
-        onBlur={stopChangeColor}
-        onChange = {(e) => {
-          if (
-            !(
-              document.getElementById('head').value === "transparent" &&
-              conflictColors.includes("transparent")
+        <input
+          type="color"
+          id="head"
+          name="head"
+          value={currColor}
+          onBlur={stopChangeColor}
+          onChange={(e) => {
+            if (
+              !(
+                document.getElementById('head').value === 'transparent' &&
+                conflictColors.includes('transparent')
+              )
             )
-          )
-            var color = document.getElementById('head');
+              var color = document.getElementById('head');
             currColor = e.target.value;
-            color.setAttribute("value", currColor);
+            color.setAttribute('value', currColor);
             setCurrColor(currColor);
-        }}></input>
+          }}
+        ></input>
+      </div>
     </div>
-  </div>
   );
 };
 
@@ -115,26 +121,28 @@ const BorderColor = ({
   currBorderColor,
   changeCurrBorderColor,
   currFillColor,
-  stopChangeBorderColor
+  stopChangeBorderColor,
 }) => {
   return (
     <ColorPicker
-      title={"Border color:"}
+      title={'Border color:'}
       currColor={currBorderColor}
       setCurrColor={changeCurrBorderColor}
-      conflictColors={[
-        currFillColor,
-        currMode === "line" ? "transparent" : null,
-      ]}
+      conflictColors={[currFillColor, currMode === 'line' ? 'transparent' : null]}
       stopChangeColor={stopChangeBorderColor}
     />
   );
 };
 
-const FillColor = ({ currFillColor, changeCurrFillColor, stopChangeFillColor, currBorderColor }) => {
+const FillColor = ({
+  currFillColor,
+  changeCurrFillColor,
+  stopChangeFillColor,
+  currBorderColor,
+}) => {
   return (
     <ColorPicker
-      title={"Fill color:"}
+      title={'Fill color:'}
       currColor={currFillColor}
       setCurrColor={changeCurrFillColor}
       conflictColors={[currBorderColor]}
@@ -143,11 +151,16 @@ const FillColor = ({ currFillColor, changeCurrFillColor, stopChangeFillColor, cu
   );
 };
 
-const BorderWidth = ({ currBorderWidth, changeCurrBorderWidth, stopSlideBorderWidth, startSlideBorderWidth, }) => {
+const BorderWidth = ({
+  currBorderWidth,
+  changeCurrBorderWidth,
+  stopSlideBorderWidth,
+  startSlideBorderWidth,
+}) => {
   return (
     <div className="Control">
       <h3>Border width:</h3>
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <input
           type="range"
           tabIndex="-1"
@@ -170,23 +183,26 @@ const VertexCount = ({ currVertexCount, changeCurrVertexCount, currMode }) => {
   return (
     <div className="Control">
       <h3>Vertex count:</h3>
-          <div className="VertexCountButtonsContainer">
-            <button
-              className="VertexCountButton"
-              onClick={() => changeCurrVertexCount(currVertexCount - 1)}
-              disabled={currVertexCount === 3}
-            >-</button>
-            <span>{currVertexCount}</span>
-            <button
-              className="VertexCountButton"
-              onClick={() => changeCurrVertexCount(currVertexCount + 1)}
-              disabled={currVertexCount === 20}
-            >+</button>
-          </div>
+      <div className="VertexCountButtonsContainer">
+        <button
+          className="VertexCountButton"
+          onClick={() => changeCurrVertexCount(currVertexCount - 1)}
+          disabled={currVertexCount === 3}
+        >
+          -
+        </button>
+        <span>{currVertexCount}</span>
+        <button
+          className="VertexCountButton"
+          onClick={() => changeCurrVertexCount(currVertexCount + 1)}
+          disabled={currVertexCount === 20}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 };
-
 
 const Delete = ({ selectedShapeId, deleteSelectedShape }) => {
   return (
@@ -197,11 +213,11 @@ const Delete = ({ selectedShapeId, deleteSelectedShape }) => {
           onClick={() => deleteSelectedShape()}
           disabled={!selectedShapeId}
           style={{
-            cursor: !selectedShapeId ? "not-allowed" : null,
+            cursor: !selectedShapeId ? 'not-allowed' : null,
           }}
         >
           <FaTrash className="ButtonIcon" /> Delete
-        </button>{" "}
+        </button>{' '}
       </div>
     </div>
   );
@@ -216,15 +232,33 @@ const UndoRedo = ({ undo, redo, repeat, disableUndo, disableRedo, canRepeat }) =
           <ImUndo className="ButtonIcon" />
           Undo
         </button>
-        {disableRedo && canRepeat
-          ?
+        {disableRedo && canRepeat ? (
           <button onClick={() => repeat()}>Repeat</button>
-          :
+        ) : (
           <button disabled={disableRedo} onClick={() => redo()}>
             <ImRedo className="ButtonIcon" />
             Redo
           </button>
-        }
+        )}
+      </div>
+    </div>
+  );
+};
+
+const OrderPanel = ({ moveForward, moveBackward, disableMoveToFront, disabledMoveToBack }) => {
+  return (
+    <div className="Control">
+      <h3>Move to Front/Move to Back:</h3>
+      <div className="UndoRedoButtonsContainer">
+        <button disabled={disableMoveToFront} onClick={() => moveForward()}>
+          {/* <ImUndo className="ButtonIcon" /> */}
+          Send Forward
+        </button>
+
+        <button disabled={disabledMoveToBack} onClick={() => moveBackward()}>
+          {/* <ImRedo className="ButtonIcon" /> */}
+          Send Backward
+        </button>
       </div>
     </div>
   );
@@ -257,11 +291,14 @@ const ControlPanel = () => {
     canUndo,
     canRedo,
     canRepeat,
+    moveForward,
+    moveBackward,
+    canMoveToFront,
+    canMoveToBack,
   } = useContext(ControlContext);
 
   return (
     <div className="ControlPanel">
-
       <Modes
         currMode={currMode}
         changeCurrMode={changeCurrMode}
@@ -269,13 +306,16 @@ const ControlPanel = () => {
         currFillColor={currFillColor}
         selectShape={selectShape}
       />
-      { (currMode === "select" && selectedShapeId && shapesMap[selectedShapeId]?.type && shapesMap[selectedShapeId].type === "polygon") ? (
+      {currMode === 'select' &&
+      selectedShapeId &&
+      shapesMap[selectedShapeId]?.type &&
+      shapesMap[selectedShapeId].type === 'polygon' ? (
         <VertexCount
           currVertexCount={currVertexCount}
           changeCurrVertexCount={changeCurrVertexCount}
           currmode={currMode}
         />
-        ) : null}
+      ) : null}
       <BorderColor
         currMode={currMode}
         currBorderColor={currBorderColor}
@@ -295,11 +335,21 @@ const ControlPanel = () => {
         currBorderColor={currBorderColor}
         stopChangeFillColor={stopChangeFillColor}
       />
-      <Delete
-        selectedShapeId={selectedShapeId}
-        deleteSelectedShape={deleteSelectedShape}
+      <Delete selectedShapeId={selectedShapeId} deleteSelectedShape={deleteSelectedShape} />
+      <UndoRedo
+        undo={undo}
+        redo={redo}
+        repeat={repeat}
+        disableUndo={!canUndo}
+        disableRedo={!canRedo}
+        canRepeat={canRepeat}
       />
-      <UndoRedo undo={undo} redo={redo} repeat={repeat} disableUndo={!canUndo} disableRedo={!canRedo} canRepeat={canRepeat} />
+      <OrderPanel
+        moveForward={moveForward}
+        moveBackward={moveBackward}
+        disableMoveToFront={!canMoveToFront}
+        disabledMoveToBack={!canMoveToBack}
+      />
     </div>
   );
 };
