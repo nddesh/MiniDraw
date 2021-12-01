@@ -54,15 +54,15 @@ export const LoginSection = (props) => {
 
 const Home = () => {
   const { userInfo, setUserInfo } = React.useContext(AuthContext);
-  if (!userInfo) {
-    return (
-      <div style={{ padding: '72px 0' }}>
-        <h1 style={{ textAlign: 'center' }}>Welcome to Mini Draw</h1>
-        <h3 style={{ textAlign: 'center' }}>Login and Let's draw</h3>
-        <LoginSection />
-      </div>
-    );
-  }
+  // if (!userInfo) {
+  //   return (
+  //     <div style={{ padding: '72px 0' }}>
+  //       <h1 style={{ textAlign: 'center' }}>Welcome to Mini Draw</h1>
+  //       <h3 style={{ textAlign: 'center' }}>Login and Let's draw</h3>
+  //       <LoginSection />
+  //     </div>
+  //   );
+  // }
   return (
     <div>
       <h1>Homepage</h1>
