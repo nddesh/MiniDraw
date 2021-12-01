@@ -53,11 +53,12 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     return workspaces;
   };
 
-  const addWorkspace = async (id) => {
+  const addWorkspace = async (id, name) => {
     const workspacesRef = collection(firestore, 'workspaces');
 
     await setDoc(doc(workspacesRef, id), {
       users: [], // TODO: Add current user.
+      name: name,
       workspaceData: {
         shapes: [],
         shapesMap: {},
@@ -66,8 +67,6 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
       },
     });
   };
-
-
 
   return (
     <FirebaseContext.Provider
