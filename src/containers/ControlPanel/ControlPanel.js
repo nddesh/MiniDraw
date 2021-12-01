@@ -362,6 +362,18 @@ const OrderPanel = ({ moveForward, moveBackward, disableMoveForward, disableMove
   );
 };
 
+const ResetPanel = ({ resetWorkspace }) => {
+  return (
+    <div className="Control">
+      <h3>Reset Workspace</h3>
+      <div className="UndoRedoButtonsContainer">
+        <button onClick={resetWorkspace} className={'delete-button'}>
+          Reset Workspace
+        </button>
+      </div>
+    </div>
+  );
+};
 const ControlPanel = () => {
   // use useContext to access the functions & values from the provider
   const {
@@ -396,6 +408,7 @@ const ControlPanel = () => {
     moveBackward,
     canMoveForward,
     canMoveBackward,
+    resetWorkspace,
   } = useContext(ControlContext);
 
   return (
@@ -449,6 +462,7 @@ const ControlPanel = () => {
         disableMoveForward={!canMoveForward}
         disableMoveBackward={!canMoveBackward}
       />
+      <ResetPanel resetWorkspace={resetWorkspace} />
     </div>
   );
 };

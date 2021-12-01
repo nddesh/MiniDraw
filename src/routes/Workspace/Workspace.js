@@ -26,45 +26,49 @@ import { FaTextHeight } from 'react-icons/fa';
 
 import { doc, onSnapshot } from 'firebase/firestore';
 
+const defaultState = {
+  workspaceName: null,
+  // controls
+  currMode: defaultValues.mode,
+  currBorderColor: defaultValues.borderColor,
+  currBorderWidth: defaultValues.borderWidth,
+  currFillColor: defaultValues.fillColor,
+  currVertexCount: 3,
+  //defaultValues.vertexCount
+  currText: '',
+  currResizeData: null,
+  // defaultValues.text
+
+  tempBorderWidth: null,
+  tempFillColor: null,
+  tempBorderColor: null,
+  tempShape: null,
+  tempResizeData: null,
+  //tempVertexCount: null,
+
+  // workspace
+  shapes: [],
+  shapesMap: {},
+  selectedShapeId: undefined,
+
+  // handling undo/redo
+  commandList: [],
+  currCommand: -1,
+  disableUndo: false,
+  disableRedo: false,
+
+  isCommandKeyPress: false,
+  isControlKeyPress: false,
+  isShiftKeyPress: false,
+
+  // Prevent updating firestore when using slider or color picker
+  // Only update when the change is done.
+  disableUpdateFirestore: false,
+};
+
 class WorkspaceRoute extends Component {
   state = {
-    workspaceName: null,
-    // controls
-    currMode: defaultValues.mode,
-    currBorderColor: defaultValues.borderColor,
-    currBorderWidth: defaultValues.borderWidth,
-    currFillColor: defaultValues.fillColor,
-    currVertexCount: 3,
-    //defaultValues.vertexCount
-    currText: '',
-    currResizeData: null,
-    // defaultValues.text
-
-    tempBorderWidth: null,
-    tempFillColor: null,
-    tempBorderColor: null,
-    tempShape: null,
-    tempResizeData: null,
-    //tempVertexCount: null,
-
-    // workspace
-    shapes: [],
-    shapesMap: {},
-    selectedShapeId: undefined,
-
-    // handling undo/redo
-    commandList: [],
-    currCommand: -1,
-    disableUndo: false,
-    disableRedo: false,
-
-    isCommandKeyPress: false,
-    isControlKeyPress: false,
-    isShiftKeyPress: false,
-
-    // Prevent updating firestore when using slider or color picker
-    // Only update when the change is done.
-    disableUpdateFirestore: false,
+    ...defaultState,
   };
 
   constructor() {
@@ -110,31 +114,30 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (!this.state.disableUpdateFirestore) {
-      // update workspace data
-      const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
-      const updatedList = [];
-      watchedFields.forEach((f) => {
-        if (!_isEqual(prevState[f], this.state[f])) {
-          updatedList.push(f);
-        }
-      });
-      if (updatedList.length > 0) {
-        this.props.updateWorkspaceData(
-          this.props.workspaceId,
-          {
-            shapes: this.state.shapes,
-            shapesMap: this.state.shapesMap,
-
-            // commandList: this.state.commandList.map((command) => {
-            //   return command.getDataForSave();
-            // }),
-            // currCommand: this.state.currCommand,
-          },
-          this.state.workspaceName
-        );
-      }
-    }
+    // if (!this.state.disableUpdateFirestore) {
+    //   // update workspace data
+    //   const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
+    //   const updatedList = [];
+    //   watchedFields.forEach((f) => {
+    //     if (!_isEqual(prevState[f], this.state[f])) {
+    //       updatedList.push(f);
+    //     }
+    //   });
+    //   if (updatedList.length > 0) {
+    //     this.props.updateWorkspaceData(
+    //       this.props.workspaceId,
+    //       {
+    //         shapes: this.state.shapes,
+    //         shapesMap: this.state.shapesMap,
+    //         // commandList: this.state.commandList.map((command) => {
+    //         //   return command.getDataForSave();
+    //         // }),
+    //         // currCommand: this.state.currCommand,
+    //       },
+    //       this.state.workspaceName
+    //     );
+    //   }
+    // }
   }
 
   getCurrState = () => {
@@ -627,6 +630,20 @@ class WorkspaceRoute extends Component {
   };
 
   /**---------------------------------------------
+   * RESET WORKSPACE
+   * ---------------------------------------------*/
+  resetWorkspace = () => {
+    const result = window.confirm(
+      'Do you want to reset this workspace? All data will be deleted and this action cannot be undone.'
+    );
+    if (result) {
+      this.setState({
+        ...defaultState,
+      });
+    }
+  };
+
+  /**---------------------------------------------
    * RENDER
    * ---------------------------------------------*/
 
@@ -690,6 +707,8 @@ class WorkspaceRoute extends Component {
             moveBackward: this.moveBackward,
             canMoveForward: this.canMoveForward(),
             canMoveBackward: this.canMoveBackward(),
+
+            resetWorkspace: this.resetWorkspace,
           }}
         >
           <h1>{this.state.workspaceName}</h1>
