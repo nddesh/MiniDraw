@@ -19,6 +19,7 @@ const SVGLayer = () => {
     currBorderWidth,
     currFillColor,
     currVertexCount,
+    currText,
     shapes,
     shapesMap,
     addShape,
@@ -140,10 +141,13 @@ const SVGLayer = () => {
               shouldCreate = false;
             }
           }
+          console.log(currMode);
 
           if (shouldCreate) {
             // if (currMode != 'line') {
               // create
+              
+              
               addShape({
                 type: currMode,
                 visible: true,
@@ -153,30 +157,36 @@ const SVGLayer = () => {
                 borderWidth: currBorderWidth,
                 fillColor: currFillColor,
                 vertexCount: currVertexCount,
+                inputText: currText,
               });
+              
               selectShape(undefined);
             // }
           }
       }
 
       // If text mode, add text to svg, change mode to select, and select the textbox
-      // if(currMode === 'text' && drawing === true) {
-      //   // create 
-      //   console.log(e.target);
-      //   addShape({
-      //     type: currMode,
-      //     visible: true,
-      //     initCoords: initPoint,
-      //     finalCoords: currPoint,
-      //     borderColor: currBorderColor,
-      //     borderWidth: currBorderWidth,
-      //     fillColor: currFillColor,
-      //     vertexCount: currVertexCount,
-      //   });
+      if(currMode === 'text') {
+        // create 
+        console.log(e.target);
+        console.log("create", currText.trim() === "");
+        if(currText.trim() !== "") {
+          addShape({
+            type: currMode,
+            visible: true,
+            initCoords: initPoint,
+            finalCoords: currPoint,
+            borderColor: currBorderColor,
+            borderWidth: currBorderWidth,
+            fillColor: currFillColor,
+            vertexCount: currVertexCount,
+            inputText: currText,
+          });
+        }
 
-      //   // changeCurrMode('select');
-      //   selectShape(e.target.id);
-      // }
+        // changeCurrMode('select');
+        // selectShape(e.target.id);
+      }
 
 
       setDrawing(false);
@@ -238,7 +248,7 @@ const SVGLayer = () => {
   }, [escKeyDownHandler]);
 
   const genShape = (shapeData, key = undefined) => {
-    const { initCoords, finalCoords, borderColor, borderWidth, fillColor, id, vertexCount } = shapeData;
+    const { initCoords, finalCoords, borderColor, borderWidth, fillColor, id, vertexCount, inputText } = shapeData;
     const filter = selectedShapeId && selectedShapeId === id ? `url(#${selectShadowId})` : null;
     switch (shapeData.type) {
       case "line": {
@@ -303,19 +313,18 @@ const SVGLayer = () => {
           filter,
         });
       }
-      // case 'text': {
-      //   return React.createElement(Text, {
-      //     x: Math.min(initCoords.x, finalCoords.x),
-      //     y: Math.min(initCoords.y, finalCoords.y),
-      //     fillColor,
-      //     borderColor,
-      //     borderWidth,
-      //     id,
-      //     currMode,
-      //     filter,
-      //     key,
-      //   });
-      // }
+      case 'text': {
+        return React.createElement(Text, {
+          x: Math.min(initCoords.x, finalCoords.x),
+          y: Math.min(initCoords.y, finalCoords.y),
+          inputText,
+          fillColor,
+          id,
+          currMode,
+          filter,
+          key,
+        });
+      }
       default: {
         return null;
       }
@@ -345,6 +354,7 @@ const SVGLayer = () => {
         borderWidth: currBorderWidth,
         fillColor: currFillColor,
         vertexCount: currVertexCount,
+        inputText: currText,
       });
     }
   };

@@ -24,6 +24,7 @@ const Layers = ({objects =[], shapesMap={}}) => {
           <ListItem
             type={object.type}
             index={index}
+            key={`${object.type}_${index}`}
           />
         );
       })}

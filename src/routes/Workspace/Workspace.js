@@ -33,6 +33,8 @@ class WorkspaceRoute extends Component {
     currFillColor: defaultValues.fillColor,
     currVertexCount: 3,
     //defaultValues.vertexCount 
+    currText: '',
+    // defaultValues.text
 
     tempBorderWidth: null,
     tempFillColor: null,
@@ -80,24 +82,24 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidMount() {
-    this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
-      this.setState({ ...res });
-    });
-    // Add undo/redo event listeners.
-    addEventListeners(this);
+    // this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
+    //   this.setState({ ...res });
+    // });
+    // // Add undo/redo event listeners.
+    // addEventListeners(this);
 
-    this.unsubscribeFirestore = onSnapshot(
-      doc(this.props.firestore, 'workspaces', this.props.workspaceId),
-      (document) => {
-        if (document) {
-          const data = document.data();
-          const { workspaceData } = data;
-          this.setState({ ...workspaceData });
-        }
+    // this.unsubscribeFirestore = onSnapshot(
+    //   doc(this.props.firestore, 'workspaces', this.props.workspaceId),
+    //   (document) => {
+    //     if (document) {
+    //       const data = document.data();
+    //       const { workspaceData } = data;
+    //       this.setState({ ...workspaceData });
+    //     }
 
-        // console.log('Current data: ', doc.data());
-      }
-    );
+    //     // console.log('Current data: ', doc.data());
+    //   }
+    // );
   }
 
   componentWillUnmount() {
@@ -105,28 +107,28 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (!this.state.disableUpdateFirestore) {
-      // update workspace data
-      const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
-      const updatedList = [];
+    // if (!this.state.disableUpdateFirestore) {
+    //   // update workspace data
+    //   const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
+    //   const updatedList = [];
 
-      watchedFields.forEach((f) => {
-        if (!_isEqual(prevState[f], this.state[f])) {
-          updatedList.push(f);
-        }
-      });
+    //   watchedFields.forEach((f) => {
+    //     if (!_isEqual(prevState[f], this.state[f])) {
+    //       updatedList.push(f);
+    //     }
+    //   });
 
-      if (updatedList.length > 0) {
-        this.props.updateWorkspaceData(this.props.workspaceId, {
-          shapes: this.state.shapes,
-          shapesMap: this.state.shapesMap,
-          // commandList: this.state.commandList.map((command) => {
-          //   return command.getDataForSave();
-          // }),
-          // currCommand: this.state.currCommand,
-        });
-      }
-    }
+    //   if (updatedList.length > 0) {
+    //     this.props.updateWorkspaceData(this.props.workspaceId, {
+    //       shapes: this.state.shapes,
+    //       shapesMap: this.state.shapesMap,
+    //       // commandList: this.state.commandList.map((command) => {
+    //       //   return command.getDataForSave();
+    //       // }),
+    //       // currCommand: this.state.currCommand,
+    //     });
+    //   }
+    // }
   }
 
   getCurrState = () => {
@@ -194,7 +196,7 @@ class WorkspaceRoute extends Component {
   };
 
   selectShape = (id, data) => {
-    const { borderColor, borderWidth, fillColor, vertexCount } = data || {};
+    const { borderColor, borderWidth, fillColor, vertexCount, inputText } = data || {};
     this.setState({ selectedShapeId: id });
     if (id) {
       const {
@@ -202,12 +204,14 @@ class WorkspaceRoute extends Component {
         borderWidth: currBorderWidth,
         fillColor: currFillColor,
         vertexCount: currVertexCount,
+        inputText: currInputText,
       } = this.state.shapesMap[this.state.shapes.filter((shapeId) => shapeId === id)[0]];
       this.setState({
         currBorderColor: borderColor ? borderColor : currBorderColor,
         currBorderWidth: borderWidth ? borderWidth : currBorderWidth,
         currFillColor: fillColor ? fillColor : currFillColor,
         currVertexCount: vertexCount ? vertexCount : currVertexCount,
+        currInputText: inputText ? inputText : currInputText,
       });
     }
   };
@@ -250,6 +254,7 @@ class WorkspaceRoute extends Component {
       id,
     };
     shapes.push(id);
+    console.log('addShape: ', shapeData);
     // this.setState({ shapes, shapesMap, selectedShapeId: id });
     this.setState({ shapes, shapesMap });
     const data = { id, ...shapeData };
@@ -532,6 +537,23 @@ class WorkspaceRoute extends Component {
   //   this.setState({ tempVertexCount: null });
   // };
 
+    /**---------------------------------------------
+   * TEXT CHANGE
+   * ---------------------------------------------*/
+  changeCurrText = (text) => {
+    this.setState({ currText: text });
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { text });
+    }
+  };
+  submitText = (text) => {
+    // if (this.state.selectedShapeId) {
+    //   this.updateShape(this.state.selectedShapeId, { text });
+    // }
+  };
+
+
+
   /**---------------------------------------------
    * RENDER
    * ---------------------------------------------*/
@@ -543,6 +565,7 @@ class WorkspaceRoute extends Component {
       currBorderWidth,
       currFillColor,
       currVertexCount,
+      currText,
       shapes,
       shapesMap,
       selectedShapeId,
@@ -567,6 +590,8 @@ class WorkspaceRoute extends Component {
             stopChangeFillColor: this.stopChangingFillColor,
             currVertexCount,
             changeCurrVertexCount: this.changeCurrVertexCount,
+            currText,
+            changeCurrText: this.changeCurrText,
 
 
             shapes,
