@@ -1,12 +1,9 @@
 import React from 'react';
-import "../Auth/Auth.css";
-import gLogo from "../../assets/images/google-logo.png";
+import "./LoginBar.css"
+import gLogo from "../../assets/img/google-logo.png";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import "./ControlPanel.css";
 
-export const Auth = (props) => {
-
-  var email = '';
+export const LoginBar = (props) => {
   
   function login() {
     const provider = new GoogleAuthProvider();
@@ -20,9 +17,7 @@ export const Auth = (props) => {
         // The signed-in user info.
         const user = result.user;
         console.log(user)
-        email = user.email;
-        props.onclick({name: user.displayName, image: user.photoURL, email: email})
-        // writeUserData(user.email);
+        props.onclick({name: user.displayName, image: user.photoURL})
         // window.location.href = "/";
         // ...
       }).catch((error) => {
@@ -38,17 +33,7 @@ export const Auth = (props) => {
     }
   
   function logOut() {
-    props.onclick({name: undefined, image: undefined, email: undefined})
-  }
-
-  function writeUserData(email) {
-    let item = {
-      "name": "hi2",
-      "image": "2_",
-      "pic": "20"
-    }
-    console.log(email)
-    db.collection(`${email}`).add(item)
+    props.onclick({name: undefined, image: undefined})
   }
 
   return (
