@@ -82,23 +82,23 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidMount() {
-    this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
-      this.setState({ workspaceName: res.name, ...res });
-    });
-    this.workspaceSVG = document.getElementById('workspace-svg');
-    // Add undo/redo event listeners.
-    addEventListeners(this);
+    // this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
+    //   this.setState({ workspaceName: res.name, ...res });
+    // });
+    // this.workspaceSVG = document.getElementById('workspace-svg');
+    // // Add undo/redo event listeners.
+    // addEventListeners(this);
 
-    this.unsubscribeFirestore = onSnapshot(
-      doc(this.props.firestore, 'workspaces', this.props.workspaceId),
-      (document) => {
-        if (document) {
-          const data = document.data();
-          const { workspaceData } = data;
-          this.setState({ ...workspaceData });
-        }
-      }
-    );
+    // this.unsubscribeFirestore = onSnapshot(
+    //   doc(this.props.firestore, 'workspaces', this.props.workspaceId),
+    //   (document) => {
+    //     if (document) {
+    //       const data = document.data();
+    //       const { workspaceData } = data;
+    //       this.setState({ ...workspaceData });
+    //     }
+    //   }
+    // );
   }
 
   componentWillUnmount() {
@@ -106,28 +106,28 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (!this.state.disableUpdateFirestore) {
-      // update workspace data
-      const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
-      const updatedList = [];
+    // if (!this.state.disableUpdateFirestore) {
+    //   // update workspace data
+    //   const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
+    //   const updatedList = [];
 
-      watchedFields.forEach((f) => {
-        if (!_isEqual(prevState[f], this.state[f])) {
-          updatedList.push(f);
-        }
-      });
+    //   watchedFields.forEach((f) => {
+    //     if (!_isEqual(prevState[f], this.state[f])) {
+    //       updatedList.push(f);
+    //     }
+    //   });
 
-      if (updatedList.length > 0) {
-        this.props.updateWorkspaceData(this.props.workspaceId, {
-          shapes: this.state.shapes,
-          shapesMap: this.state.shapesMap,
-          // commandList: this.state.commandList.map((command) => {
-          //   return command.getDataForSave();
-          // }),
-          // currCommand: this.state.currCommand,
-        });
-      }
-    }
+    //   if (updatedList.length > 0) {
+    //     this.props.updateWorkspaceData(this.props.workspaceId, {
+    //       shapes: this.state.shapes,
+    //       shapesMap: this.state.shapesMap,
+    //       // commandList: this.state.commandList.map((command) => {
+    //       //   return command.getDataForSave();
+    //       // }),
+    //       // currCommand: this.state.currCommand,
+    //     });
+    //   }
+    // }
   }
 
   getCurrState = () => {
