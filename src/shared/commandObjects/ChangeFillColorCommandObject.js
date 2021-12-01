@@ -58,8 +58,12 @@ export default class ChangeFillColorCommandObject extends CommandObject {
     // TODO: Check if the object type is line => cannot repeat this
     const currentWorkspaceShape = this.getWorkspaceObject();
     const commamndShape = this.targetObject;
-    if (currentWorkspaceShape.id === commamndShape.id) return false;
-    return this.getWorkspaceObject() !== null && this.getWorkspaceObject() !== undefined;
+    if (!this.getWorkspaceObject() || currentWorkspaceShape.id === commamndShape.id) {
+      return false;
+    } else {
+      return true;
+    }
+    // return this.getWorkspaceObject() !== null && this.getWorkspaceObject() !== undefined;
   }
 
   /* override to execute the operation again, this time possibly on
