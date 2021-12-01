@@ -30,7 +30,7 @@ const SVGLayer = () => {
     stopMoveShape,
     changeCurrMode,
     resizeShape,
-    startResizeShape, 
+    startResizeShape,
     stopResizeShape,
   } = useContext(ControlContext);
 
@@ -53,15 +53,15 @@ const SVGLayer = () => {
   });
 
   const resizeDirectionDict = {
-    'selection_group_0': [1, 1, 0, 0],
-    'selection_group_1': [0, 1, 0, 0],
-    'selection_group_2': [0, 1, 1, 0],
-    'selection_group_3': [0, 0, 1, 0],
-    'selection_group_4': [0, 0, 1, 1],
-    'selection_group_5': [0, 0, 0, 1],
-    'selection_group_6': [1, 0, 0, 1],
-    'selection_group_7': [1, 0, 0, 0],
-  }
+    selection_group_0: [1, 1, 0, 0],
+    selection_group_1: [0, 1, 0, 0],
+    selection_group_2: [0, 1, 1, 0],
+    selection_group_3: [0, 0, 1, 0],
+    selection_group_4: [0, 0, 1, 1],
+    selection_group_5: [0, 0, 0, 1],
+    selection_group_6: [1, 0, 0, 1],
+    selection_group_7: [1, 0, 0, 0],
+  };
 
   const handleMouseDown = (e) => {
     if (currMode !== 'select') {
@@ -76,8 +76,8 @@ const SVGLayer = () => {
         // deselect
         selectShape(undefined);
       } else {
-        if (e.target.className?.baseVal === "selectionGroup") {
-          // resize 
+        if (e.target.className?.baseVal === 'selectionGroup') {
+          // resize
           // console.log("resize");
           setResizing(true);
           setMouseDownPoint({
@@ -85,7 +85,7 @@ const SVGLayer = () => {
             y: e.nativeEvent.offsetY,
           });
           setResizingShape(shapesMap[selectedShapeId]);
-          startResizeShape(selectedShapeId);
+          // startResizeShape(selectedShapeId);
           setResizeDirection(e.target.id);
         } else {
           // select
@@ -98,7 +98,7 @@ const SVGLayer = () => {
           });
           setDraggingShape(shapesMap[shapes.filter((shapeId) => shapeId === targetId)[0]]);
           startMoveShape(targetId);
-      }
+        }
       }
     }
   };
@@ -121,14 +121,13 @@ const SVGLayer = () => {
         },
       });
     } else if (resizing && resizingShape) {
-      const direction = resizeDirection; 
+      const direction = resizeDirection;
 
-      const initCoordsX = resizeDirectionDict[direction][0]
-      const initCoordsY = resizeDirectionDict[direction][1]
-      const finalCoordsX = resizeDirectionDict[direction][2]
-      const finalCoordsY = resizeDirectionDict[direction][3] 
+      const initCoordsX = resizeDirectionDict[direction][0];
+      const initCoordsY = resizeDirectionDict[direction][1];
+      const finalCoordsX = resizeDirectionDict[direction][2];
+      const finalCoordsY = resizeDirectionDict[direction][3];
 
-  
       const deltaX = e.nativeEvent.offsetX - mouseDownPoint.x;
       const deltaY = e.nativeEvent.offsetY - mouseDownPoint.y;
 
@@ -138,16 +137,19 @@ const SVGLayer = () => {
       const finalCoordsYResult = resizingShape.finalCoords.y + finalCoordsY * deltaY;
 
       // if result shape is too small or too big, do not resize
-      if (finalCoordsXResult - initCoordsXResult < 20 || finalCoordsYResult - initCoordsXResult < 20
-        || finalCoordsXResult - initCoordsXResult > 500 || finalCoordsYResult - initCoordsXResult > 500) {
+      if (
+        finalCoordsXResult - initCoordsXResult < 20 ||
+        finalCoordsYResult - initCoordsXResult < 20 ||
+        finalCoordsXResult - initCoordsXResult > 500 ||
+        finalCoordsYResult - initCoordsXResult > 500
+      ) {
         return;
       }
-
 
       resizeShape({
         initCoords: {
           x: initCoordsXResult,
-          y: initCoordsYResult
+          y: initCoordsYResult,
         },
         finalCoords: {
           x: finalCoordsXResult,
@@ -159,49 +161,48 @@ const SVGLayer = () => {
 
   const handleMouseUp = (e) => {
     if (currMode !== 'select') {
-        if (currMode !== 'text' && !(initPoint.x === currPoint.x && initPoint.y === currPoint.y)) {
-          // check if it's too small
-          const threshold = 10;
-          let shouldCreate = true;
-          const deltaX = Math.abs(initPoint.x - currPoint.x);
-          const deltaY = Math.abs(initPoint.y - currPoint.y);
-          if (currMode === 'line') {
-            if (Math.sqrt(deltaX ** 2 + deltaY ** 2) < threshold) {
-              shouldCreate = false;
-            }
-          } else {
-            if (deltaX < threshold || deltaY < threshold) {
-              shouldCreate = false;
-            }
+      if (currMode !== 'text' && !(initPoint.x === currPoint.x && initPoint.y === currPoint.y)) {
+        // check if it's too small
+        const threshold = 10;
+        let shouldCreate = true;
+        const deltaX = Math.abs(initPoint.x - currPoint.x);
+        const deltaY = Math.abs(initPoint.y - currPoint.y);
+        if (currMode === 'line') {
+          if (Math.sqrt(deltaX ** 2 + deltaY ** 2) < threshold) {
+            shouldCreate = false;
           }
+        } else {
+          if (deltaX < threshold || deltaY < threshold) {
+            shouldCreate = false;
+          }
+        }
 
-          if (shouldCreate) {
-            // if (currMode != 'line') {
-              // create
-              
-              
-              addShape({
-                type: currMode,
-                visible: true,
-                initCoords: initPoint,
-                finalCoords: currPoint,
-                borderColor: currBorderColor,
-                borderWidth: currBorderWidth,
-                fillColor: currFillColor,
-                vertexCount: currVertexCount,
-                inputText: currText,
-              });
-              
-              selectShape(undefined);
-            // }
-          }
+        if (shouldCreate) {
+          // if (currMode != 'line') {
+          // create
+
+          addShape({
+            type: currMode,
+            visible: true,
+            initCoords: initPoint,
+            finalCoords: currPoint,
+            borderColor: currBorderColor,
+            borderWidth: currBorderWidth,
+            fillColor: currFillColor,
+            vertexCount: currVertexCount,
+            inputText: currText,
+          });
+
+          selectShape(undefined);
+          // }
+        }
       }
 
       // If text mode, add text to svg, change mode to select, and select the textbox
-      if(currMode === 'text') {
-        // create 
-      
-        if(currText.trim() !== "") {
+      if (currMode === 'text') {
+        // create
+
+        if (currText.trim() !== '') {
           addShape({
             type: currMode,
             visible: true,
@@ -219,13 +220,12 @@ const SVGLayer = () => {
         // selectShape(e.target.id);
       }
 
-
       setDrawing(false);
       setInitPoint({ x: undefined, y: undefined });
       setCurrPoint({ x: undefined, y: undefined });
     } else {
       if (resizing && resizingShape) {
-        // resize 
+        // resize
         setResizing(false);
         setResizingShape(undefined);
         setMouseDownPoint({ x: undefined, y: undefined });
@@ -296,10 +296,19 @@ const SVGLayer = () => {
   }, [escKeyDownHandler]);
 
   const genShape = (shapeData, key = undefined) => {
-    const { initCoords, finalCoords, borderColor, borderWidth, fillColor, id, vertexCount, inputText } = shapeData;
+    const {
+      initCoords,
+      finalCoords,
+      borderColor,
+      borderWidth,
+      fillColor,
+      id,
+      vertexCount,
+      inputText,
+    } = shapeData;
     const filter = selectedShapeId && selectedShapeId === id ? `url(#${selectShadowId})` : null;
     switch (shapeData.type) {
-      case "line": {
+      case 'line': {
         return React.createElement(Line, {
           x1: initCoords.x,
           y1: initCoords.y,
@@ -346,7 +355,6 @@ const SVGLayer = () => {
         });
       }
       case 'polygon': {
-
         return React.createElement(Polygon, {
           x: Math.min(initCoords.x, finalCoords.x),
           y: Math.min(initCoords.y, finalCoords.y),
@@ -410,10 +418,11 @@ const SVGLayer = () => {
   const selectionHandler = () => {
     // check if a shape is selected
     if (selectedShapeId) {
-
-      var myPathBox = document.getElementById(selectedShapeId)?.getBBox({fill: true, stroke: true, clipped: true});
+      var myPathBox = document
+        .getElementById(selectedShapeId)
+        ?.getBBox({ fill: true, stroke: true, clipped: true });
       const shape = shapesMap[selectedShapeId];
-      if(shape?.type && shape.type !== 'line') {
+      if (shape?.type && shape.type !== 'line') {
         return React.createElement(Selection, {
           type: shape.type,
           x: myPathBox.x,
@@ -434,7 +443,7 @@ const SVGLayer = () => {
         });
       }
     }
-  } 
+  };
 
   return (
     <svg
@@ -445,7 +454,7 @@ const SVGLayer = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      {(currMode === "select") ? (selectionHandler()) : null}
+      {currMode === 'select' ? selectionHandler() : null}
       <filter id={selectShadowId} x="-100%" y="-100%" width="400%" height="400%">
         <feDropShadow dx="0" dy="0" stdDeviation="15" floodColor="rgba(0, 0, 0, 0.7)" />
       </filter>

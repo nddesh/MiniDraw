@@ -19,6 +19,7 @@ import ChangeBorderColorCommandObject from '../../shared/commandObjects/ChangeBo
 import ChangeBorderWidthCommandObject from '../../shared/commandObjects/ChangeBorderWidthCommandObject';
 import ChangeVertexCountCommandObject from '../../shared/commandObjects/ChangeVertexCountCommandObject';
 import MoveShapeCommandObject from '../../shared/commandObjects/MoveShapeCommandObject';
+import ResizeCommandObject from '../../shared/commandObjects/ResizeCommandObject';
 
 import { addEventListeners } from './utils';
 import { FaTextHeight } from 'react-icons/fa';
@@ -36,12 +37,14 @@ class WorkspaceRoute extends Component {
     currVertexCount: 3,
     //defaultValues.vertexCount
     currText: '',
+    currResizeData: null,
     // defaultValues.text
 
     tempBorderWidth: null,
     tempFillColor: null,
     tempBorderColor: null,
     tempShape: null,
+    tempResizeData: null,
     //tempVertexCount: null,
 
     // workspace
@@ -346,15 +349,34 @@ class WorkspaceRoute extends Component {
    * RESIZE SHAPE
    * ---------------------------------------------*/
   resizeShape = (newData) => {
+    if (!this.state.tempResizeData) {
+      this.disableUpdateFirestore(() => {
+        this.startResizeShape(newData);
+      });
+    }
+    this.setState({ currResizeData: newData });
     if (this.state.selectedShapeId) {
       this.updateShape(this.state.selectedShapeId, newData);
     }
   };
-  startResizeShape = (id) => {
-    // let shapesMap = { ...this.state.shapesMap };
-    // this.setState({ tempShape: shapesMap[id] });
+  startResizeShape = (newData) => {
+    this.setState({ tempResizeData: newData });
   };
   stopResizeShape = () => {
+    this.enableUpdateFirestore(() => {
+      if (this.state.tempResizeData !== this.state.currResizeData && this.getCurrShape()) {
+        const data = {
+          oldValue: this.state.tempResizeData,
+          newValue: this.state.currResizeData,
+          targetShape: this.getCurrShape(),
+        };
+        const commandObj = new ResizeCommandObject(this.undoHandler, data);
+        if (commandObj.canExecute()) {
+          commandObj.execute();
+        }
+      }
+      this.setState({ tempResizeData: null });
+    });
     // if (
     //   this.state.tempShape &&
     //   this.getCurrShape() &&
