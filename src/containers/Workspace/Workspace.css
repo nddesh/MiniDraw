@@ -25,9 +25,15 @@
   font-size: inherit;
   padding: 1px 6px;
   display: block;
-  overflow: hidden;
-  resize: both;
-  max-width: 300px;
-  max-height: 200px;
+  overflow: auto;
+  resize: vertical;
+  width: 200px;
+  min-height: 80px;
+  max-height: fit-content;
 }
 
+.text-buttons {
+  margin-top: 5px;
+  float: right;
+  margin-right: 45px;
+}

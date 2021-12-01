@@ -1,8 +1,25 @@
-/* body {
-  font-family: Verdana, sans-serif;
+#nav ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 30px auto;
+  align-content: center;
+}
 
+#nav ul li {
+  list-style-type: none;
+}
+
+#nav ul li a {
+  text-decoration: none;
+  color: #000000;
+}
+
+#nav ul li a:hover {
+  text-decoration: none;
+  color: #666666;
+}
+
+p {
   margin: 0;
-  padding: 0;
-
-  position: relative;
-} */
+}

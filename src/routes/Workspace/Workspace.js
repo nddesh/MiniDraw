@@ -33,6 +33,8 @@ class WorkspaceRoute extends Component {
     currFillColor: defaultValues.fillColor,
     currVertexCount: 3,
     //defaultValues.vertexCount
+    currText: '',
+    // defaultValues.text
 
     tempBorderWidth: null,
     tempFillColor: null,
@@ -192,7 +194,7 @@ class WorkspaceRoute extends Component {
   };
 
   selectShape = (id, data) => {
-    const { borderColor, borderWidth, fillColor, vertexCount } = data || {};
+    const { borderColor, borderWidth, fillColor, vertexCount, inputText } = data || {};
     this.setState({ selectedShapeId: id });
     if (id) {
       const {
@@ -200,12 +202,14 @@ class WorkspaceRoute extends Component {
         borderWidth: currBorderWidth,
         fillColor: currFillColor,
         vertexCount: currVertexCount,
+        inputText: currInputText,
       } = this.state.shapesMap[this.state.shapes.filter((shapeId) => shapeId === id)[0]];
       this.setState({
         currBorderColor: borderColor ? borderColor : currBorderColor,
         currBorderWidth: borderWidth ? borderWidth : currBorderWidth,
         currFillColor: fillColor ? fillColor : currFillColor,
         currVertexCount: vertexCount ? vertexCount : currVertexCount,
+        currInputText: inputText ? inputText : currInputText,
       });
     }
   };
@@ -290,6 +294,7 @@ class WorkspaceRoute extends Component {
       id,
     };
     shapes.push(id);
+    console.log('addShape: ', shapeData);
     // this.setState({ shapes, shapesMap, selectedShapeId: id });
     this.setState({ shapes, shapesMap });
     const data = { id, ...shapeData };
@@ -571,6 +576,21 @@ class WorkspaceRoute extends Component {
   // };
 
   /**---------------------------------------------
+   * TEXT CHANGE
+   * ---------------------------------------------*/
+  changeCurrText = (text) => {
+    this.setState({ currText: text });
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, { text });
+    }
+  };
+  submitText = (text) => {
+    // if (this.state.selectedShapeId) {
+    //   this.updateShape(this.state.selectedShapeId, { text });
+    // }
+  };
+
+  /**---------------------------------------------
    * RENDER
    * ---------------------------------------------*/
 
@@ -581,6 +601,7 @@ class WorkspaceRoute extends Component {
       currBorderWidth,
       currFillColor,
       currVertexCount,
+      currText,
       shapes,
       shapesMap,
       selectedShapeId,
@@ -605,6 +626,8 @@ class WorkspaceRoute extends Component {
             stopChangeFillColor: this.stopChangingFillColor,
             currVertexCount,
             changeCurrVertexCount: this.changeCurrVertexCount,
+            currText,
+            changeCurrText: this.changeCurrText,
 
             shapes,
             shapesMap,
