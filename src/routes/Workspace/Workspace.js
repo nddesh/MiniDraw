@@ -742,7 +742,11 @@ class WorkspaceRoute extends Component {
               commands={this.state.commandList}
               currCommandIndex={this.state.currCommand}
             />
-            <Layers objects={this.state.shapes} shapesMap={this.state.shapesMap} />
+            <Layers
+              objects={this.getVisibleShapes()}
+              shapesMap={this.state.shapesMap}
+              selectedShapeId={this.state.selectedShapeId}
+            />
           </div>
         </ControlContext.Provider>
       </React.Fragment>

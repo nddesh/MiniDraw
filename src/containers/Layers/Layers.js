@@ -1,19 +1,18 @@
-// you will need to MODIFY this and other files to make them work with command objects, 
+// you will need to MODIFY this and other files to make them work with command objects,
 // instead of directly performing the actions
-import React, { useContext } from "react";
+import React, { useContext } from 'react';
 
-import "../Layers/Layers.css";
+import '../Layers/Layers.css';
 
-const ListItem = ({type, index }) => {
+const ListItem = ({ type, index, selected }) => {
   return (
-    <div>
-      {type}{' '}
-      {index}
+    <div className={`${selected ? 'list-item-selected' : ''}`}>
+      {type} {index}
     </div>
   );
 };
 
-const Layers = ({objects =[], shapesMap={}}) => {
+const Layers = ({ objects = [], shapesMap = {}, selectedShapeId }) => {
   // use useContext to access the functions & values from the provider
   // console.log(objects, shapesMap);
   return (
@@ -21,14 +20,8 @@ const Layers = ({objects =[], shapesMap={}}) => {
       <h4>Layers</h4>
       {objects.map((id, index) => {
         const object = shapesMap[id];
-        console.log("hi");
         return (
-          <ListItem
-            key={id}
-            type={object.type}
-            index={index}
-            key={`${object.type}_${index}`}
-          />
+          <ListItem key={id} type={object.type} index={index} selected={id === selectedShapeId} />
         );
       })}
     </div>

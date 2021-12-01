@@ -6,7 +6,7 @@
   box-sizing: border-box;
   border: 1px solid black;
   border-left-width: 0px;
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
 
   width: 181px;
   height: 450px;
@@ -27,5 +27,9 @@ h4 {
 }
 
 .Layers div {
-  margin: 5px 15px;
+  padding: 5px 15px;
+}
+.list-item-selected {
+  background-color: black;
+  color: rgb(3, 230, 3);
 }
