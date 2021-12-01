@@ -7,7 +7,7 @@ import { FirebaseContext } from '../contexts/firebaseContext';
 
 const Workspaces = () => {
   const [workspaces, setWorkspaces] = React.useState([]);
-  const { getWorkspaces, addWorkspace } = React.useContext(FirebaseContext);
+  const { getWorkspaces, addWorkspace, deleteWorkspace } = React.useContext(FirebaseContext);
 
   React.useEffect(() => {
     getData();
@@ -22,6 +22,13 @@ const Workspaces = () => {
     const workspaceName = prompt('Create the name of your workspace');
     const id = uuidv4();
     await addWorkspace(id, workspaceName);
+  };
+
+  const handleDeleteWorkspace = async (id, name) => {
+    const result = window.confirm(`Do you want to delete workspace ${name}`);
+    if (result) {
+      await deleteWorkspace(id);
+    }
   };
 
   return (
@@ -39,7 +46,15 @@ const Workspaces = () => {
                 <div className={'workspace-name'}>
                   {w.name ? w.name : `No name set for workspace ID ${w.id}`}
                 </div>
-                <button className={'delete-button'}>Delete</button>
+                <button
+                  className={'delete-button'}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDeleteWorkspace(w.id, w.name);
+                  }}
+                >
+                  Delete
+                </button>
               </li>
             </Link>
           );
