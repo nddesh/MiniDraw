@@ -10,7 +10,7 @@ import Home from './routes/Home';
 import Workspaces from './routes/Workspaces';
 import Workspace from './routes/Workspace';
 
-import { LoginBar } from './routes/LoginBar/LoginBar';
+// import { LoginBar } from './routes/LoginBar/LoginBar';
 
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';

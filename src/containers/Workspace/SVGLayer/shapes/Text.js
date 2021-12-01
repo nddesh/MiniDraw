@@ -8,7 +8,6 @@ export default ({
   inputText,
   filter,
 }) => {
-  console.log(inputText);
   return (
     <text 
       id={id}

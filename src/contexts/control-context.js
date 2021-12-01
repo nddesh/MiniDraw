@@ -12,6 +12,8 @@ const controlContext = createContext({
   changeCurrFillColor: () => {},
   currVertexCount: 3,
   changeCurrVertexCount: () => {},
+  currText: "",
+  changeCurrText: () => {},
 
   shapes: [],
   shapesMap: {},

@@ -45,11 +45,23 @@ const SVGLayer = () => {
   const [draggingShape, setDraggingShape] = useState(undefined);
   const [resizing, setResizing] = useState(false);
   const [resizingShape, setResizingShape] = useState(undefined);
+  const [resizeDirection, setResizeDirection] = useState(undefined);
 
   const [mouseDownPoint, setMouseDownPoint] = useState({
     x: undefined,
     y: undefined,
   });
+
+  const resizeDirectionDict = {
+    'selection_group_0': [1, 1, 0, 0],
+    'selection_group_1': [0, 1, 0, 0],
+    'selection_group_2': [0, 1, 1, 0],
+    'selection_group_3': [0, 0, 1, 0],
+    'selection_group_4': [0, 0, 1, 1],
+    'selection_group_5': [0, 0, 0, 1],
+    'selection_group_6': [1, 0, 0, 1],
+    'selection_group_7': [1, 0, 0, 0],
+  }
 
   const handleMouseDown = (e) => {
     if (currMode !== 'select') {
@@ -74,6 +86,7 @@ const SVGLayer = () => {
           });
           setResizingShape(shapesMap[selectedShapeId]);
           startResizeShape(selectedShapeId);
+          setResizeDirection(e.target.id);
         } else {
           // select
           const targetId = e.target.id;
@@ -108,17 +121,37 @@ const SVGLayer = () => {
         },
       });
     } else if (resizing && resizingShape) {
+      const direction = resizeDirection; 
+
+      const initCoordsX = resizeDirectionDict[direction][0]
+      const initCoordsY = resizeDirectionDict[direction][1]
+      const finalCoordsX = resizeDirectionDict[direction][2]
+      const finalCoordsY = resizeDirectionDict[direction][3] 
+
+  
       const deltaX = e.nativeEvent.offsetX - mouseDownPoint.x;
       const deltaY = e.nativeEvent.offsetY - mouseDownPoint.y;
 
+      const initCoordsXResult = resizingShape.initCoords.x + initCoordsX * deltaX;
+      const initCoordsYResult = resizingShape.initCoords.y + initCoordsY * deltaY;
+      const finalCoordsXResult = resizingShape.finalCoords.x + finalCoordsX * deltaX;
+      const finalCoordsYResult = resizingShape.finalCoords.y + finalCoordsY * deltaY;
+
+      // if result shape is too small or too big, do not resize
+      if (finalCoordsXResult - initCoordsXResult < 20 || finalCoordsYResult - initCoordsXResult < 20
+        || finalCoordsXResult - initCoordsXResult > 500 || finalCoordsYResult - initCoordsXResult > 500) {
+        return;
+      }
+
+
       resizeShape({
         initCoords: {
-          x: resizingShape.initCoords.x,
-          y: resizingShape.initCoords.y,
+          x: initCoordsXResult,
+          y: initCoordsYResult
         },
         finalCoords: {
-          x: resizingShape.finalCoords.x + deltaX,
-          y: resizingShape.finalCoords.y + deltaY,
+          x: finalCoordsXResult,
+          y: finalCoordsYResult,
         },
       });
     }
@@ -141,7 +174,6 @@ const SVGLayer = () => {
               shouldCreate = false;
             }
           }
-          console.log(currMode);
 
           if (shouldCreate) {
             // if (currMode != 'line') {
@@ -168,8 +200,7 @@ const SVGLayer = () => {
       // If text mode, add text to svg, change mode to select, and select the textbox
       if(currMode === 'text') {
         // create 
-        console.log(e.target);
-        console.log("create", currText.trim() === "");
+      
         if(currText.trim() !== "") {
           addShape({
             type: currMode,
@@ -193,11 +224,12 @@ const SVGLayer = () => {
       setInitPoint({ x: undefined, y: undefined });
       setCurrPoint({ x: undefined, y: undefined });
     } else {
-      if (e.target.className?.baseVal == "selectionGroup") {
+      if (resizing && resizingShape) {
         // resize 
         setResizing(false);
         setResizingShape(undefined);
         setMouseDownPoint({ x: undefined, y: undefined });
+        setResizeDirection(undefined);
         stopResizeShape();
       } else {
         setDragging(false);
@@ -233,10 +265,26 @@ const SVGLayer = () => {
           setDragging(false);
           setDraggingShape(undefined);
           setMouseDownPoint({ x: undefined, y: undefined });
+        } else if (resizing) {
+          resizeShape({
+            initCoords: {
+              x: resizingShape.initCoords.x,
+              y: resizingShape.initCoords.y,
+            },
+            finalCoords: {
+              x: resizingShape.finalCoords.x,
+              y: resizingShape.finalCoords.y,
+            },
+          });
+          setResizing(false);
+          setResizingShape(undefined);
+          setMouseDownPoint({ x: undefined, y: undefined });
+          setResizeDirection(undefined);
+          stopResizeShape();
         }
       }
     },
-    [drawing, dragging, draggingShape, moveShape]
+    [drawing, dragging, draggingShape, moveShape, resizing, resizingShape, resizeShape]
   );
 
   // useEffect will run after the render is committed to the screen
@@ -365,13 +413,23 @@ const SVGLayer = () => {
 
       var myPathBox = document.getElementById(selectedShapeId)?.getBBox({fill: true, stroke: true, clipped: true});
       const shape = shapesMap[selectedShapeId];
-      if(shape?.type) {
+      if(shape?.type && shape.type !== 'line') {
         return React.createElement(Selection, {
           type: shape.type,
           x: myPathBox.x,
           y: myPathBox.y,
           width: myPathBox.width,
           height: myPathBox.height,
+          borderWidth: shape.borderWidth,
+        });
+      } else if (shape?.type === 'line') {
+        console.log(shape);
+        return React.createElement(Selection, {
+          type: shape.type,
+          x1: shape.initCoords.x,
+          y1: shape.initCoords.y,
+          x2: shape.finalCoords.x,
+          y2: shape.finalCoords.y,
           borderWidth: shape.borderWidth,
         });
       }
