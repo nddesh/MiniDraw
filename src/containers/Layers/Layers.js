@@ -18,8 +18,10 @@ const Layers = ({objects =[], shapesMap={}}) => {
   // console.log(objects, shapesMap);
   return (
     <div className="Layers">
+      <h4>Layers</h4>
       {objects.map((id, index) => {
         const object = shapesMap[id];
+        console.log("hi");
         return (
           <ListItem
             key={id}

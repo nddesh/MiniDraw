@@ -1,18 +1,31 @@
 .Layers {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 460px;
+  left: 1150px;
 
   box-sizing: border-box;
   border: 1px solid black;
+  border-left-width: 0px;
   background-color: #F5F5F5;
 
-  width: 150px;
-  height: 700px;
+  width: 181px;
+  height: 450px;
 
   user-select: none;
 }
 
 .Layers p {
   margin: 10px;
+}
+
+h4 {
+  font-size: 1.2em;
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #cccccc;
+  margin: 20px 0;
+}
+
+.Layers div {
+  margin: 5px 15px;
 }

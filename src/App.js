@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 
 import { FirebaseProvider } from './contexts/firebaseContext';
 import { AuthProvider } from './contexts/authContext';
@@ -10,7 +9,7 @@ import Home from './routes/Home';
 import Workspaces from './routes/Workspaces';
 import Workspace from './routes/Workspace';
 
-import { LoginBar } from './routes/LoginBar/LoginBar';
+// import { LoginBar } from './routes/LoginBar/LoginBar';
 
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
@@ -27,6 +26,7 @@ const App = (props) => {
         <Router>
           <div>
             <div id="nav">
+              <h1>Mini Draw</h1>
               <ul>
                 <li>
                   <Link to="/">Home</Link>
