@@ -12,6 +12,7 @@
   height: 700px;
 
   user-select: none;
+  overflow: scroll;
 }
 
 .ControlPanel .Control {

@@ -25,6 +25,7 @@ const Layers = ({objects =[], shapesMap={}}) => {
             key={id}
             type={object.type}
             index={index}
+            key={`${object.type}_${index}`}
           />
         );
       })}

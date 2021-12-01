@@ -204,6 +204,30 @@ const VertexCount = ({ currVertexCount, changeCurrVertexCount, currMode }) => {
   );
 };
 
+// const submitText
+
+const TextInput = ({ currText, changeCurrText, cancelText, submitText }) => {
+  return (
+    <div className="Control">
+      <h3>Text Input:</h3>
+      <textarea
+        value={currText}
+        onChange={(e) => changeCurrText(e.target.value)}
+        // onBlur={stopChangeText}
+        autoFocus
+        type="text"
+        width="500px"
+        className="textarea resize-ta"
+      />
+      {/* cancel and submit button */}
+      <div>
+        {/* <button className="btn btn-primary" onClick={() => cancelText()}>Close</button> */}
+        {/* <button className="btn btn-primary" className="text-buttons" onClick={() => submitText()}>Submit</button> */}
+      </div>
+    </div>
+  );
+};
+
 const Delete = ({ selectedShapeId, deleteSelectedShape }) => {
   return (
     <div className="Control">
@@ -285,6 +309,9 @@ const ControlPanel = () => {
     selectShape,
     deleteSelectedShape,
     shapesMap,
+    currText,
+    changeCurrText,
+    submitText,
     undo,
     redo,
     repeat,
@@ -306,16 +333,14 @@ const ControlPanel = () => {
         currFillColor={currFillColor}
         selectShape={selectShape}
       />
-      {currMode === 'select' &&
-      selectedShapeId &&
-      shapesMap[selectedShapeId]?.type &&
-      shapesMap[selectedShapeId].type === 'polygon' ? (
-        <VertexCount
-          currVertexCount={currVertexCount}
-          changeCurrVertexCount={changeCurrVertexCount}
-          currmode={currMode}
-        />
-      ) : null}
+      {currMode === 'text' && (
+        <TextInput currText={currText} changeCurrText={changeCurrText} submitText={submitText} />
+      )}
+      <VertexCount
+        currVertexCount={currVertexCount}
+        changeCurrVertexCount={changeCurrVertexCount}
+        currmode={currMode}
+      />
       <BorderColor
         currMode={currMode}
         currBorderColor={currBorderColor}
