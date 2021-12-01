@@ -254,9 +254,21 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * ORDERING
    * ---------------------------------------------*/
+  getVisibleShapes = () => {
+    const visibleShapes = this.state.shapes.filter(
+      (id) => this.state.shapesMap[id].visible === true
+    );
+    return visibleShapes;
+  };
   moveForward = () => {
+    // Find the nextElementId in visibleShapes
+    const visibleShapes = this.getVisibleShapes();
+    const selectedElementIndexInVisibleShapes = visibleShapes.indexOf(this.state.selectedShapeId);
+    const nextElementId = visibleShapes[selectedElementIndexInVisibleShapes + 1];
+
+    // In this.state.shapes
     const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
-    const nextElementIndex = selectedElementIndex + 1;
+    const nextElementIndex = this.state.shapes.indexOf(nextElementId);
 
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[nextElementIndex];
@@ -264,8 +276,13 @@ class WorkspaceRoute extends Component {
     this.setState({ shapes: newShapes });
   };
   moveBackward = () => {
+    // Find the nextElementId in visibleShapes
+    const visibleShapes = this.getVisibleShapes();
+    const selectedElementIndexInVisibleShapes = visibleShapes.indexOf(this.state.selectedShapeId);
+    const prevElementId = visibleShapes[selectedElementIndexInVisibleShapes - 1];
+
     const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
-    const prevElementIndex = selectedElementIndex - 1;
+    const prevElementIndex = this.state.shapes.indexOf(prevElementId);
 
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[prevElementIndex];
@@ -277,7 +294,8 @@ class WorkspaceRoute extends Component {
     if (!this.state.selectedShapeId) {
       return false;
     }
-    if (this.state.shapes.indexOf(this.state.selectedShapeId) >= this.state.shapes.length - 1) {
+    const visibleShapes = this.getVisibleShapes();
+    if (visibleShapes.indexOf(this.state.selectedShapeId) >= visibleShapes.length - 1) {
       return false;
     }
     return true;
@@ -286,7 +304,8 @@ class WorkspaceRoute extends Component {
     if (!this.state.selectedShapeId) {
       return false;
     }
-    if (this.state.shapes.indexOf(this.state.selectedShapeId) <= 0) {
+    const visibleShapes = this.getVisibleShapes();
+    if (visibleShapes.indexOf(this.state.selectedShapeId) <= 0) {
       return false;
     }
     return true;
