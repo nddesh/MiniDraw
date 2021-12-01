@@ -250,7 +250,7 @@ class WorkspaceRoute extends Component {
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[nextElementIndex];
     newShapes[nextElementIndex] = this.state.shapes[selectedElementIndex];
-    this.setState({ shapes: newShapes }, () => console.log(this.state.shapes));
+    this.setState({ shapes: newShapes });
   };
   moveBackward = () => {
     const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
@@ -259,7 +259,7 @@ class WorkspaceRoute extends Component {
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[prevElementIndex];
     newShapes[prevElementIndex] = this.state.shapes[selectedElementIndex];
-    this.setState({ shapes: newShapes }, () => console.log(this.state.shapes));
+    this.setState({ shapes: newShapes });
   };
 
   canMoveForward = () => {
@@ -294,7 +294,7 @@ class WorkspaceRoute extends Component {
       id,
     };
     shapes.push(id);
-    console.log('addShape: ', shapeData);
+    // console.log('addShape: ', shapeData);
     // this.setState({ shapes, shapesMap, selectedShapeId: id });
     this.setState({ shapes, shapesMap });
     const data = { id, ...shapeData };
