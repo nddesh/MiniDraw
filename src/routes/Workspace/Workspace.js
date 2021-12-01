@@ -258,10 +258,22 @@ class WorkspaceRoute extends Component {
     this.setState({ shapes: newShapes }, () => console.log(this.state.shapes));
   };
 
-  canMoveToFront = () => {
+  canMoveForward = () => {
+    if (!this.state.selectedShapeId) {
+      return false;
+    }
+    if (this.state.shapes.indexOf(this.state.selectedShapeId) >= this.state.shapes.length - 1) {
+      return false;
+    }
     return true;
   };
-  canMoveToBack = () => {
+  canMoveBackward = () => {
+    if (!this.state.selectedShapeId) {
+      return false;
+    }
+    if (this.state.shapes.indexOf(this.state.selectedShapeId) <= 0) {
+      return false;
+    }
     return true;
   };
 
@@ -617,8 +629,8 @@ class WorkspaceRoute extends Component {
 
             moveForward: this.moveForward,
             moveBackward: this.moveBackward,
-            canMoveToFront: this.canMoveToFront(),
-            canMoveToBack: this.canMoveToBack(),
+            canMoveForward: this.canMoveForward(),
+            canMoveBackward: this.canMoveBackward(),
           }}
         >
           <Layers objects={this.state.shapes} shapesMap={this.state.shapesMap} />
