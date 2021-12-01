@@ -114,30 +114,31 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    // if (!this.state.disableUpdateFirestore) {
-    //   // update workspace data
-    //   const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
-    //   const updatedList = [];
-    //   watchedFields.forEach((f) => {
-    //     if (!_isEqual(prevState[f], this.state[f])) {
-    //       updatedList.push(f);
-    //     }
-    //   });
-    //   if (updatedList.length > 0) {
-    //     this.props.updateWorkspaceData(
-    //       this.props.workspaceId,
-    //       {
-    //         shapes: this.state.shapes,
-    //         shapesMap: this.state.shapesMap,
-    //         // commandList: this.state.commandList.map((command) => {
-    //         //   return command.getDataForSave();
-    //         // }),
-    //         // currCommand: this.state.currCommand,
-    //       },
-    //       this.state.workspaceName
-    //     );
-    //   }
-    // }
+    if (!this.state.disableUpdateFirestore) {
+      // update workspace data
+      const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
+      const updatedList = [];
+      watchedFields.forEach((f) => {
+        if (!_isEqual(prevState[f], this.state[f])) {
+          updatedList.push(f);
+        }
+      });
+      if (updatedList.length > 0) {
+        this.props.updateWorkspaceData(
+          this.props.workspaceId,
+          {
+            shapes: this.state.shapes,
+            shapesMap: this.state.shapesMap,
+
+            // commandList: this.state.commandList.map((command) => {
+            //   return command.getDataForSave();
+            // }),
+            // currCommand: this.state.currCommand,
+          },
+          this.state.workspaceName
+        );
+      }
+    }
   }
 
   getCurrState = () => {
@@ -741,6 +742,7 @@ class WorkspaceRoute extends Component {
               commands={this.state.commandList}
               currCommandIndex={this.state.currCommand}
             />
+            <Layers objects={this.state.shapes} shapesMap={this.state.shapesMap} />
           </div>
         </ControlContext.Provider>
       </React.Fragment>
@@ -752,15 +754,15 @@ const WorkspaceWrapper = ({ ...props }) => {
   const { workspaceId } = useParams();
   const { firestore, getWorkspaceData, updateWorkspaceData } = React.useContext(FirebaseContext);
   return (
-    // <div style={{ position: 'relative', width: '100%', height: '1000px', overflowX: 'scroll' }}>
-    <WorkspaceRoute
-      firestore={firestore}
-      getWorkspaceData={getWorkspaceData}
-      updateWorkspaceData={updateWorkspaceData}
-      workspaceId={workspaceId}
-      {...props}
-    />
-    // </div>
+    <div style={{ margin: 'auto', overflowX: 'scroll' }}>
+      <WorkspaceRoute
+        firestore={firestore}
+        getWorkspaceData={getWorkspaceData}
+        updateWorkspaceData={updateWorkspaceData}
+        workspaceId={workspaceId}
+        {...props}
+      />
+    </div>
   );
 };
 export default WorkspaceWrapper;

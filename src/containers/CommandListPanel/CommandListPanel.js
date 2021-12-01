@@ -16,6 +16,7 @@ const ListItem = ({ commandName, colorCode, isCurrent, isActive }) => {
 const CommandListPanel = ({ commands = [], currCommandIndex }) => {
   return (
     <div className={'CommandListPanel'}>
+      <h4>Actions</h4>
       {commands.map((command, index) => {
         return (
           <ListItem
