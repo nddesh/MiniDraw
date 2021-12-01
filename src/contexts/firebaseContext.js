@@ -15,6 +15,7 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
       // });
       // return { ...doc.workspaceData, commandList: newCommandList };
       return {
+        name: doc.name,
         shapes: doc.workspaceData.shapes,
         shapesMap: doc.workspaceData.shapesMap,
       };
@@ -70,7 +71,7 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
   const deleteWorkspace = async (id) => {
     await deleteDoc(doc(firestore, 'workspaces', id));
   };
-  
+
   return (
     <FirebaseContext.Provider
       value={{

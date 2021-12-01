@@ -26,6 +26,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 
 class WorkspaceRoute extends Component {
   state = {
+    workspaceName: null,
     // controls
     currMode: defaultValues.mode,
     currBorderColor: defaultValues.borderColor,
@@ -82,7 +83,7 @@ class WorkspaceRoute extends Component {
 
   componentDidMount() {
     this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
-      this.setState({ ...res });
+      this.setState({ workspaceName: res.name, ...res });
     });
     this.workspaceSVG = document.getElementById('workspace-svg');
     // Add undo/redo event listeners.
@@ -656,14 +657,18 @@ class WorkspaceRoute extends Component {
             canMoveBackward: this.canMoveBackward(),
           }}
         >
-          <Layers objects={this.state.shapes} shapesMap={this.state.shapesMap} />
-
-          <Workspace />
-          <ControlPanel />
-          <CommandListPanel
-            commands={this.state.commandList}
-            currCommandIndex={this.state.currCommand}
-          />
+          <h1>{this.state.workspaceName}</h1>
+          {/* <Layers objects={this.state.shapes} shapesMap={this.state.shapesMap} /> */}
+          <div
+            style={{ position: 'relative', width: '100%', height: '1000px', overflowX: 'scroll' }}
+          >
+            <Workspace />
+            <ControlPanel />
+            <CommandListPanel
+              commands={this.state.commandList}
+              currCommandIndex={this.state.currCommand}
+            />
+          </div>
         </ControlContext.Provider>
       </React.Fragment>
     );
@@ -674,7 +679,7 @@ const WorkspaceWrapper = ({ ...props }) => {
   const { workspaceId } = useParams();
   const { firestore, getWorkspaceData, updateWorkspaceData } = React.useContext(FirebaseContext);
   return (
-    <div style={{ position: 'relative', width: '100%', height: '1000px', overflowX: 'scroll' }}>
+    // <div style={{ position: 'relative', width: '100%', height: '1000px', overflowX: 'scroll' }}>
       <WorkspaceRoute
         firestore={firestore}
         getWorkspaceData={getWorkspaceData}
@@ -682,7 +687,7 @@ const WorkspaceWrapper = ({ ...props }) => {
         workspaceId={workspaceId}
         {...props}
       />
-    </div>
+    // </div>
   );
 };
 export default WorkspaceWrapper;
