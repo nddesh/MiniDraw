@@ -67,6 +67,8 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     });
   };
 
+
+
   return (
     <FirebaseContext.Provider
       value={{
