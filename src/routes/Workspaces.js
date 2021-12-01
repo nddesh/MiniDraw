@@ -27,11 +27,20 @@ const Workspaces = () => {
   return (
     <>
       <h1>Workspaces</h1>
-      <ul id="workspaces">
+      <ul id="workspaces" className={'workspace-list'}>
         {workspaces.map((w) => {
           return (
-            <Link to={`/workspaces/${w.id}`} key={w.id}>
-              <li>{w.name ? w.name : `No name set for workspace ID ${w.id}`}</li>
+            <Link
+              to={`/workspaces/${w.id}`}
+              key={w.id}
+              style={{ width: 'fit-content', display: 'block' }}
+            >
+              <li className={'workspace-card'}>
+                <div className={'workspace-name'}>
+                  {w.name ? w.name : `No name set for workspace ID ${w.id}`}
+                </div>
+                <button className={'delete-button'}>Delete</button>
+              </li>
             </Link>
           );
         })}
