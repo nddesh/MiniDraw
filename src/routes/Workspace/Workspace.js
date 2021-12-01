@@ -120,14 +120,19 @@ class WorkspaceRoute extends Component {
         }
       });
       if (updatedList.length > 0) {
-        this.props.updateWorkspaceData(this.props.workspaceId, {
-          shapes: this.state.shapes,
-          shapesMap: this.state.shapesMap,
-          // commandList: this.state.commandList.map((command) => {
-          //   return command.getDataForSave();
-          // }),
-          // currCommand: this.state.currCommand,
-        });
+        this.props.updateWorkspaceData(
+          this.props.workspaceId,
+          {
+            shapes: this.state.shapes,
+            shapesMap: this.state.shapesMap,
+
+            // commandList: this.state.commandList.map((command) => {
+            //   return command.getDataForSave();
+            // }),
+            // currCommand: this.state.currCommand,
+          },
+          this.state.workspaceName
+        );
       }
     }
   }
