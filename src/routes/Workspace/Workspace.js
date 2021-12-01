@@ -26,45 +26,49 @@ import { FaTextHeight } from 'react-icons/fa';
 
 import { doc, onSnapshot } from 'firebase/firestore';
 
+const defaultState = {
+  workspaceName: null,
+  // controls
+  currMode: defaultValues.mode,
+  currBorderColor: defaultValues.borderColor,
+  currBorderWidth: defaultValues.borderWidth,
+  currFillColor: defaultValues.fillColor,
+  currVertexCount: 3,
+  //defaultValues.vertexCount
+  currText: '',
+  currResizeData: null,
+  // defaultValues.text
+
+  tempBorderWidth: null,
+  tempFillColor: null,
+  tempBorderColor: null,
+  tempShape: null,
+  tempResizeData: null,
+  //tempVertexCount: null,
+
+  // workspace
+  shapes: [],
+  shapesMap: {},
+  selectedShapeId: undefined,
+
+  // handling undo/redo
+  commandList: [],
+  currCommand: -1,
+  disableUndo: false,
+  disableRedo: false,
+
+  isCommandKeyPress: false,
+  isControlKeyPress: false,
+  isShiftKeyPress: false,
+
+  // Prevent updating firestore when using slider or color picker
+  // Only update when the change is done.
+  disableUpdateFirestore: false,
+};
+
 class WorkspaceRoute extends Component {
   state = {
-    workspaceName: null,
-    // controls
-    currMode: defaultValues.mode,
-    currBorderColor: defaultValues.borderColor,
-    currBorderWidth: defaultValues.borderWidth,
-    currFillColor: defaultValues.fillColor,
-    currVertexCount: 3,
-    //defaultValues.vertexCount
-    currText: '',
-    currResizeData: null,
-    // defaultValues.text
-
-    tempBorderWidth: null,
-    tempFillColor: null,
-    tempBorderColor: null,
-    tempShape: null,
-    tempResizeData: null,
-    //tempVertexCount: null,
-
-    // workspace
-    shapes: [],
-    shapesMap: {},
-    selectedShapeId: undefined,
-
-    // handling undo/redo
-    commandList: [],
-    currCommand: -1,
-    disableUndo: false,
-    disableRedo: false,
-
-    isCommandKeyPress: false,
-    isControlKeyPress: false,
-    isShiftKeyPress: false,
-
-    // Prevent updating firestore when using slider or color picker
-    // Only update when the change is done.
-    disableUpdateFirestore: false,
+    ...defaultState,
   };
 
   constructor() {
@@ -251,9 +255,21 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * ORDERING
    * ---------------------------------------------*/
+  getVisibleShapes = () => {
+    const visibleShapes = this.state.shapes.filter(
+      (id) => this.state.shapesMap[id].visible === true
+    );
+    return visibleShapes;
+  };
   moveForward = () => {
+    // Find the nextElementId in visibleShapes
+    const visibleShapes = this.getVisibleShapes();
+    const selectedElementIndexInVisibleShapes = visibleShapes.indexOf(this.state.selectedShapeId);
+    const nextElementId = visibleShapes[selectedElementIndexInVisibleShapes + 1];
+
+    // In this.state.shapes
     const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
-    const nextElementIndex = selectedElementIndex + 1;
+    const nextElementIndex = this.state.shapes.indexOf(nextElementId);
 
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[nextElementIndex];
@@ -261,8 +277,13 @@ class WorkspaceRoute extends Component {
     this.setState({ shapes: newShapes });
   };
   moveBackward = () => {
+    // Find the nextElementId in visibleShapes
+    const visibleShapes = this.getVisibleShapes();
+    const selectedElementIndexInVisibleShapes = visibleShapes.indexOf(this.state.selectedShapeId);
+    const prevElementId = visibleShapes[selectedElementIndexInVisibleShapes - 1];
+
     const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
-    const prevElementIndex = selectedElementIndex - 1;
+    const prevElementIndex = this.state.shapes.indexOf(prevElementId);
 
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[prevElementIndex];
@@ -274,7 +295,8 @@ class WorkspaceRoute extends Component {
     if (!this.state.selectedShapeId) {
       return false;
     }
-    if (this.state.shapes.indexOf(this.state.selectedShapeId) >= this.state.shapes.length - 1) {
+    const visibleShapes = this.getVisibleShapes();
+    if (visibleShapes.indexOf(this.state.selectedShapeId) >= visibleShapes.length - 1) {
       return false;
     }
     return true;
@@ -283,7 +305,8 @@ class WorkspaceRoute extends Component {
     if (!this.state.selectedShapeId) {
       return false;
     }
-    if (this.state.shapes.indexOf(this.state.selectedShapeId) <= 0) {
+    const visibleShapes = this.getVisibleShapes();
+    if (visibleShapes.indexOf(this.state.selectedShapeId) <= 0) {
       return false;
     }
     return true;
@@ -627,6 +650,20 @@ class WorkspaceRoute extends Component {
   };
 
   /**---------------------------------------------
+   * RESET WORKSPACE
+   * ---------------------------------------------*/
+  resetWorkspace = () => {
+    const result = window.confirm(
+      'Do you want to reset this workspace? All data will be deleted and this action cannot be undone.'
+    );
+    if (result) {
+      this.setState({
+        ...defaultState,
+      });
+    }
+  };
+
+  /**---------------------------------------------
    * RENDER
    * ---------------------------------------------*/
 
@@ -690,6 +727,8 @@ class WorkspaceRoute extends Component {
             moveBackward: this.moveBackward,
             canMoveForward: this.canMoveForward(),
             canMoveBackward: this.canMoveBackward(),
+
+            resetWorkspace: this.resetWorkspace,
           }}
         >
           <h1>{this.state.workspaceName}</h1>
@@ -703,6 +742,11 @@ class WorkspaceRoute extends Component {
               commands={this.state.commandList}
               currCommandIndex={this.state.currCommand}
             />
+            <Layers
+              objects={this.getVisibleShapes()}
+              shapesMap={this.state.shapesMap}
+              selectedShapeId={this.state.selectedShapeId}
+            />
           </div>
         </ControlContext.Provider>
       </React.Fragment>
@@ -714,15 +758,15 @@ const WorkspaceWrapper = ({ ...props }) => {
   const { workspaceId } = useParams();
   const { firestore, getWorkspaceData, updateWorkspaceData } = React.useContext(FirebaseContext);
   return (
-    // <div style={{ position: 'relative', width: '100%', height: '1000px', overflowX: 'scroll' }}>
-    <WorkspaceRoute
-      firestore={firestore}
-      getWorkspaceData={getWorkspaceData}
-      updateWorkspaceData={updateWorkspaceData}
-      workspaceId={workspaceId}
-      {...props}
-    />
-    // </div>
+    <div style={{ margin: 'auto', overflowX: 'scroll' }}>
+      <WorkspaceRoute
+        firestore={firestore}
+        getWorkspaceData={getWorkspaceData}
+        updateWorkspaceData={updateWorkspaceData}
+        workspaceId={workspaceId}
+        {...props}
+      />
+    </div>
   );
 };
 export default WorkspaceWrapper;

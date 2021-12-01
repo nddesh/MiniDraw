@@ -87,12 +87,86 @@ const Modes = ({ currMode, changeCurrMode, currBorderColor, currFillColor, selec
   );
 };
 
+const ColorPickerPopup = ({
+  currColor,
+  setCurrColor,
+  stopChangeColor,
+  conflictColors,
+  onClose,
+}) => {
+  const [color, setColor] = React.useState(currColor);
+  const handleConfirm = () => {
+    setCurrColor(color);
+    stopChangeColor();
+    onClose();
+  };
+
+  const handleCancel = () => {
+    onClose();
+  };
+
+  return (
+    <div className={'color-picker-popup-container'}>
+      <h4>Select Color</h4>
+      <input
+        type="color"
+        id="head"
+        name="head"
+        value={color}
+        onBlur={stopChangeColor}
+        onChange={(e) => {
+          if (
+            !(
+              document.getElementById('head').value === 'transparent' &&
+              conflictColors.includes('transparent')
+            )
+          )
+            var color = document.getElementById('head');
+          currColor = e.target.value;
+          color.setAttribute('value', currColor);
+          setColor(currColor);
+        }}
+      />
+      <div className={'color-picker-popup-buttons'}>
+        <button onClick={handleConfirm}>Confirm</button>
+        <button onClick={handleCancel} className={'delete-button'}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+};
 const ColorPicker = ({ title, currColor, setCurrColor, stopChangeColor, conflictColors }) => {
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpenPopup = () => {
+    setOpen(true);
+  };
+  const handleClosePopup = () => {
+    setOpen(false);
+  };
   return (
     <div className="Control">
       <h3>{title}</h3>
       <div className="Modes">
-        <input
+        <div className={'color-picker-wrapper'}>
+          <div className={'color-picker-open-button'} onClick={handleOpenPopup}>
+            <div
+              className={'color-picker-open-button-inner'}
+              style={{ backgroundColor: currColor }}
+            ></div>
+          </div>
+          {open ? (
+            <ColorPickerPopup
+              currColor={currColor}
+              setCurrColor={setCurrColor}
+              stopChangeColor={stopChangeColor}
+              conflictColors={conflictColors}
+              onClose={handleClosePopup}
+            />
+          ) : null}
+        </div>
+        {/* <input
           type="color"
           id="head"
           name="head"
@@ -110,7 +184,7 @@ const ColorPicker = ({ title, currColor, setCurrColor, stopChangeColor, conflict
             color.setAttribute('value', currColor);
             setCurrColor(currColor);
           }}
-        ></input>
+        ></input> */}
       </div>
     </div>
   );
@@ -288,6 +362,18 @@ const OrderPanel = ({ moveForward, moveBackward, disableMoveForward, disableMove
   );
 };
 
+const ResetPanel = ({ resetWorkspace }) => {
+  return (
+    <div className="Control">
+      <h3>Reset Workspace</h3>
+      <div className="UndoRedoButtonsContainer">
+        <button onClick={resetWorkspace} className={'delete-button'}>
+          Reset Workspace
+        </button>
+      </div>
+    </div>
+  );
+};
 const ControlPanel = () => {
   // use useContext to access the functions & values from the provider
   const {
@@ -322,6 +408,7 @@ const ControlPanel = () => {
     moveBackward,
     canMoveForward,
     canMoveBackward,
+    resetWorkspace,
   } = useContext(ControlContext);
 
   return (
@@ -375,6 +462,7 @@ const ControlPanel = () => {
         disableMoveForward={!canMoveForward}
         disableMoveBackward={!canMoveBackward}
       />
+      <ResetPanel resetWorkspace={resetWorkspace} />
     </div>
   );
 };

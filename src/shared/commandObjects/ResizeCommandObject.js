@@ -6,7 +6,6 @@ export default class ResizeCommandObject extends CommandObject {
     super(undoHandler, true, { data, type: COMMAND_TYPES.CHANGE_VERTEXT_COUNT });
     this.getWorkspaceObject = undoHandler.getCurrShape;
     this.targetObject = data.targetShape;
-    console.log(data);
     this.newValue = data.newValue; // resize data
     this.oldValue = data.oldValue; // resize data
     this.commandName = `Resize ${this.targetObject.type}`;
@@ -32,7 +31,6 @@ export default class ResizeCommandObject extends CommandObject {
   /* override to undo the operation of this command
    */
   undo() {
-    console.log(this.oldValue, this.newValue);
     this.undoHandler.updateShape(this.targetObject.id, { ...this.oldValue });
     this.undoHandler.selectShape(this.targetObject.id, { ...this.oldValue });
   }

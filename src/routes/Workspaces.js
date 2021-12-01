@@ -43,7 +43,7 @@ const Workspaces = () => {
 
   return (
     <>
-      <h1>Workspaces</h1>
+      <h2>Workspaces</h2>
       <ul id="workspaces" className={'workspace-list'}>
         {workspaces.map((w) => {
           return (

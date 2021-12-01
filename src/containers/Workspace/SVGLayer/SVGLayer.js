@@ -421,7 +421,11 @@ const SVGLayer = () => {
       var myPathBox = document
         .getElementById(selectedShapeId)
         ?.getBBox({ fill: true, stroke: true, clipped: true });
+
       const shape = shapesMap[selectedShapeId];
+      if (!myPathBox || !shape || !selectedShapeId) {
+        return;
+      }
       if (shape?.type && shape.type !== 'line') {
         return React.createElement(Selection, {
           type: shape.type,
@@ -454,7 +458,6 @@ const SVGLayer = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      {currMode === 'select' ? selectionHandler() : null}
       <filter id={selectShadowId} x="-100%" y="-100%" width="400%" height="400%">
         <feDropShadow dx="0" dy="0" stdDeviation="15" floodColor="rgba(0, 0, 0, 0.7)" />
       </filter>
@@ -462,6 +465,7 @@ const SVGLayer = () => {
         return renderShape(shapesMap[shapeId], idx);
       })}
       {drawing && renderTempShape()}
+      {currMode === 'select' ? selectionHandler() : null}
     </svg>
   );
 };
