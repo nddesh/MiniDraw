@@ -17,7 +17,9 @@ import DeleteShapeCommandObject from '../../shared/commandObjects/DeleteShapeCom
 import ChangeFillColorCommandObject from '../../shared/commandObjects/ChangeFillColorCommandObject';
 import ChangeBorderColorCommandObject from '../../shared/commandObjects/ChangeBorderColorCommandObject';
 import ChangeBorderWidthCommandObject from '../../shared/commandObjects/ChangeBorderWidthCommandObject';
+import ChangeVertexCountCommandObject from '../../shared/commandObjects/ChangeVertexCountCommandObject';
 import MoveShapeCommandObject from '../../shared/commandObjects/MoveShapeCommandObject';
+import ResizeCommandObject from '../../shared/commandObjects/ResizeCommandObject';
 
 import { addEventListeners } from './utils';
 import { FaTextHeight } from 'react-icons/fa';
@@ -35,12 +37,14 @@ class WorkspaceRoute extends Component {
     currVertexCount: 3,
     //defaultValues.vertexCount
     currText: '',
+    currResizeData: null,
     // defaultValues.text
 
     tempBorderWidth: null,
     tempFillColor: null,
     tempBorderColor: null,
     tempShape: null,
+    tempResizeData: null,
     //tempVertexCount: null,
 
     // workspace
@@ -78,27 +82,27 @@ class WorkspaceRoute extends Component {
       changeBorderColor: this.changeBorderColor,
       changeFillColor: this.changeFillColor,
       changeBorderWidth: this.changeBorderWidth,
+      changeCurrVertexCount: this.changeCurrVertexCount,
     };
   }
 
   componentDidMount() {
-    // this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
-    //   this.setState({ workspaceName: res.name, ...res });
-    // });
-    // this.workspaceSVG = document.getElementById('workspace-svg');
-    // // Add undo/redo event listeners.
-    // addEventListeners(this);
-
-    // this.unsubscribeFirestore = onSnapshot(
-    //   doc(this.props.firestore, 'workspaces', this.props.workspaceId),
-    //   (document) => {
-    //     if (document) {
-    //       const data = document.data();
-    //       const { workspaceData } = data;
-    //       this.setState({ ...workspaceData });
-    //     }
-    //   }
-    // );
+    this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
+      this.setState({ workspaceName: res.name, ...res });
+    });
+    this.workspaceSVG = document.getElementById('workspace-svg');
+    // Add undo/redo event listeners.
+    addEventListeners(this);
+    this.unsubscribeFirestore = onSnapshot(
+      doc(this.props.firestore, 'workspaces', this.props.workspaceId),
+      (document) => {
+        if (document) {
+          const data = document.data();
+          const { workspaceData } = data;
+          this.setState({ ...workspaceData });
+        }
+      }
+    );
   }
 
   componentWillUnmount() {
@@ -106,28 +110,31 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    // if (!this.state.disableUpdateFirestore) {
-    //   // update workspace data
-    //   const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
-    //   const updatedList = [];
+    if (!this.state.disableUpdateFirestore) {
+      // update workspace data
+      const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
+      const updatedList = [];
+      watchedFields.forEach((f) => {
+        if (!_isEqual(prevState[f], this.state[f])) {
+          updatedList.push(f);
+        }
+      });
+      if (updatedList.length > 0) {
+        this.props.updateWorkspaceData(
+          this.props.workspaceId,
+          {
+            shapes: this.state.shapes,
+            shapesMap: this.state.shapesMap,
 
-    //   watchedFields.forEach((f) => {
-    //     if (!_isEqual(prevState[f], this.state[f])) {
-    //       updatedList.push(f);
-    //     }
-    //   });
-
-    //   if (updatedList.length > 0) {
-    //     this.props.updateWorkspaceData(this.props.workspaceId, {
-    //       shapes: this.state.shapes,
-    //       shapesMap: this.state.shapesMap,
-    //       // commandList: this.state.commandList.map((command) => {
-    //       //   return command.getDataForSave();
-    //       // }),
-    //       // currCommand: this.state.currCommand,
-    //     });
-    //   }
-    // }
+            // commandList: this.state.commandList.map((command) => {
+            //   return command.getDataForSave();
+            // }),
+            // currCommand: this.state.currCommand,
+          },
+          this.state.workspaceName
+        );
+      }
+    }
   }
 
   getCurrState = () => {
@@ -251,7 +258,7 @@ class WorkspaceRoute extends Component {
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[nextElementIndex];
     newShapes[nextElementIndex] = this.state.shapes[selectedElementIndex];
-    this.setState({ shapes: newShapes }, () => console.log(this.state.shapes));
+    this.setState({ shapes: newShapes });
   };
   moveBackward = () => {
     const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
@@ -260,7 +267,7 @@ class WorkspaceRoute extends Component {
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[prevElementIndex];
     newShapes[prevElementIndex] = this.state.shapes[selectedElementIndex];
-    this.setState({ shapes: newShapes }, () => console.log(this.state.shapes));
+    this.setState({ shapes: newShapes });
   };
 
   canMoveForward = () => {
@@ -295,7 +302,7 @@ class WorkspaceRoute extends Component {
       id,
     };
     shapes.push(id);
-    console.log('addShape: ', shapeData);
+    // console.log('addShape: ', shapeData);
     // this.setState({ shapes, shapesMap, selectedShapeId: id });
     this.setState({ shapes, shapesMap });
     const data = { id, ...shapeData };
@@ -347,15 +354,34 @@ class WorkspaceRoute extends Component {
    * RESIZE SHAPE
    * ---------------------------------------------*/
   resizeShape = (newData) => {
+    if (!this.state.tempResizeData) {
+      this.disableUpdateFirestore(() => {
+        this.startResizeShape(newData);
+      });
+    }
+    this.setState({ currResizeData: newData });
     if (this.state.selectedShapeId) {
       this.updateShape(this.state.selectedShapeId, newData);
     }
   };
-  startResizeShape = (id) => {
-    // let shapesMap = { ...this.state.shapesMap };
-    // this.setState({ tempShape: shapesMap[id] });
+  startResizeShape = (newData) => {
+    this.setState({ tempResizeData: newData });
   };
   stopResizeShape = () => {
+    this.enableUpdateFirestore(() => {
+      if (this.state.tempResizeData !== this.state.currResizeData && this.getCurrShape()) {
+        const data = {
+          oldValue: this.state.tempResizeData,
+          newValue: this.state.currResizeData,
+          targetShape: this.getCurrShape(),
+        };
+        const commandObj = new ResizeCommandObject(this.undoHandler, data);
+        if (commandObj.canExecute()) {
+          commandObj.execute();
+        }
+      }
+      this.setState({ tempResizeData: null });
+    });
     // if (
     //   this.state.tempShape &&
     //   this.getCurrShape() &&
@@ -548,12 +574,21 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE VERTEX COUNT
    * ---------------------------------------------*/
-  changeCurrVertexCount = (vertexCount) => {
-    // if(!this.state.tempVertexCount) {
-    //   this.startChangingVertexCount(vertexCount)
-    // }
+  changeCurrVertexCount = (vertexCount, isRepeat) => {
+    if (vertexCount && this.state.currVertexCount && this.getCurrShape()) {
+      const data = {
+        oldValue: this.state.currVertexCount,
+        newValue: vertexCount,
+        targetShape: this.getCurrShape(),
+      };
+      const commandObj = new ChangeVertexCountCommandObject(this.undoHandler, data, isRepeat);
+      if (commandObj.canExecute()) {
+        commandObj.execute();
+      }
+    }
 
     this.setState({ currVertexCount: vertexCount });
+
     if (this.state.selectedShapeId) {
       this.updateShape(this.state.selectedShapeId, { vertexCount });
     }
@@ -680,13 +715,13 @@ const WorkspaceWrapper = ({ ...props }) => {
   const { firestore, getWorkspaceData, updateWorkspaceData } = React.useContext(FirebaseContext);
   return (
     // <div style={{ position: 'relative', width: '100%', height: '1000px', overflowX: 'scroll' }}>
-      <WorkspaceRoute
-        firestore={firestore}
-        getWorkspaceData={getWorkspaceData}
-        updateWorkspaceData={updateWorkspaceData}
-        workspaceId={workspaceId}
-        {...props}
-      />
+    <WorkspaceRoute
+      firestore={firestore}
+      getWorkspaceData={getWorkspaceData}
+      updateWorkspaceData={updateWorkspaceData}
+      workspaceId={workspaceId}
+      {...props}
+    />
     // </div>
   );
 };
