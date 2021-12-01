@@ -17,6 +17,7 @@ import DeleteShapeCommandObject from '../../shared/commandObjects/DeleteShapeCom
 import ChangeFillColorCommandObject from '../../shared/commandObjects/ChangeFillColorCommandObject';
 import ChangeBorderColorCommandObject from '../../shared/commandObjects/ChangeBorderColorCommandObject';
 import ChangeBorderWidthCommandObject from '../../shared/commandObjects/ChangeBorderWidthCommandObject';
+import ChangeVertexCountCommandObject from '../../shared/commandObjects/ChangeVertexCountCommandObject';
 import MoveShapeCommandObject from '../../shared/commandObjects/MoveShapeCommandObject';
 
 import { addEventListeners } from './utils';
@@ -78,27 +79,27 @@ class WorkspaceRoute extends Component {
       changeBorderColor: this.changeBorderColor,
       changeFillColor: this.changeFillColor,
       changeBorderWidth: this.changeBorderWidth,
+      changeCurrVertexCount: this.changeCurrVertexCount,
     };
   }
 
   componentDidMount() {
-    this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
-      this.setState({ workspaceName: res.name, ...res });
-    });
-    this.workspaceSVG = document.getElementById('workspace-svg');
-    // Add undo/redo event listeners.
-    addEventListeners(this);
-
-    this.unsubscribeFirestore = onSnapshot(
-      doc(this.props.firestore, 'workspaces', this.props.workspaceId),
-      (document) => {
-        if (document) {
-          const data = document.data();
-          const { workspaceData } = data;
-          this.setState({ ...workspaceData });
-        }
-      }
-    );
+    // this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
+    //   this.setState({ workspaceName: res.name, ...res });
+    // });
+    // this.workspaceSVG = document.getElementById('workspace-svg');
+    // // Add undo/redo event listeners.
+    // addEventListeners(this);
+    // this.unsubscribeFirestore = onSnapshot(
+    //   doc(this.props.firestore, 'workspaces', this.props.workspaceId),
+    //   (document) => {
+    //     if (document) {
+    //       const data = document.data();
+    //       const { workspaceData } = data;
+    //       this.setState({ ...workspaceData });
+    //     }
+    //   }
+    // );
   }
 
   componentWillUnmount() {
@@ -106,28 +107,26 @@ class WorkspaceRoute extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (!this.state.disableUpdateFirestore) {
-      // update workspace data
-      const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
-      const updatedList = [];
-
-      watchedFields.forEach((f) => {
-        if (!_isEqual(prevState[f], this.state[f])) {
-          updatedList.push(f);
-        }
-      });
-
-      if (updatedList.length > 0) {
-        this.props.updateWorkspaceData(this.props.workspaceId, {
-          shapes: this.state.shapes,
-          shapesMap: this.state.shapesMap,
-          // commandList: this.state.commandList.map((command) => {
-          //   return command.getDataForSave();
-          // }),
-          // currCommand: this.state.currCommand,
-        });
-      }
-    }
+    // if (!this.state.disableUpdateFirestore) {
+    //   // update workspace data
+    //   const watchedFields = ['shapes', 'shapesMap', 'commandList', 'currCommand'];
+    //   const updatedList = [];
+    //   watchedFields.forEach((f) => {
+    //     if (!_isEqual(prevState[f], this.state[f])) {
+    //       updatedList.push(f);
+    //     }
+    //   });
+    //   if (updatedList.length > 0) {
+    //     this.props.updateWorkspaceData(this.props.workspaceId, {
+    //       shapes: this.state.shapes,
+    //       shapesMap: this.state.shapesMap,
+    //       // commandList: this.state.commandList.map((command) => {
+    //       //   return command.getDataForSave();
+    //       // }),
+    //       // currCommand: this.state.currCommand,
+    //     });
+    //   }
+    // }
   }
 
   getCurrState = () => {
@@ -548,12 +547,21 @@ class WorkspaceRoute extends Component {
   /**---------------------------------------------
    * CHANGE VERTEX COUNT
    * ---------------------------------------------*/
-  changeCurrVertexCount = (vertexCount) => {
-    // if(!this.state.tempVertexCount) {
-    //   this.startChangingVertexCount(vertexCount)
-    // }
+  changeCurrVertexCount = (vertexCount, isRepeat) => {
+    if (vertexCount && this.state.currVertexCount && this.getCurrShape()) {
+      const data = {
+        oldValue: this.state.currVertexCount,
+        newValue: vertexCount,
+        targetShape: this.getCurrShape(),
+      };
+      const commandObj = new ChangeVertexCountCommandObject(this.undoHandler, data, isRepeat);
+      if (commandObj.canExecute()) {
+        commandObj.execute();
+      }
+    }
 
     this.setState({ currVertexCount: vertexCount });
+
     if (this.state.selectedShapeId) {
       this.updateShape(this.state.selectedShapeId, { vertexCount });
     }
