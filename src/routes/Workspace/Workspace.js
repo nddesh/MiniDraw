@@ -32,7 +32,7 @@ class WorkspaceRoute extends Component {
     currBorderWidth: defaultValues.borderWidth,
     currFillColor: defaultValues.fillColor,
     currVertexCount: 3,
-    //defaultValues.vertexCount 
+    //defaultValues.vertexCount
 
     tempBorderWidth: null,
     tempFillColor: null,
@@ -62,7 +62,6 @@ class WorkspaceRoute extends Component {
 
   constructor() {
     super();
-    
 
     this.undoHandler = {
       registerExecution: this.registerExecution,
@@ -83,6 +82,7 @@ class WorkspaceRoute extends Component {
     this.props.getWorkspaceData(this.props.workspaceId, this.undoHandler).then((res) => {
       this.setState({ ...res });
     });
+    this.workspaceSVG = document.getElementById('workspace-svg');
     // Add undo/redo event listeners.
     addEventListeners(this);
 
@@ -94,8 +94,6 @@ class WorkspaceRoute extends Component {
           const { workspaceData } = data;
           this.setState({ ...workspaceData });
         }
-
-        // console.log('Current data: ', doc.data());
       }
     );
   }
@@ -237,6 +235,36 @@ class WorkspaceRoute extends Component {
   enableUpdateFirestore = (callback) => {
     this.setState({ disableUpdateFirestore: false }, callback);
   };
+
+  /**---------------------------------------------
+   * ORDERING
+   * ---------------------------------------------*/
+  moveForward = () => {
+    const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
+    const nextElementIndex = selectedElementIndex + 1;
+
+    const newShapes = [...this.state.shapes];
+    newShapes[selectedElementIndex] = this.state.shapes[nextElementIndex];
+    newShapes[nextElementIndex] = this.state.shapes[selectedElementIndex];
+    this.setState({ shapes: newShapes }, () => console.log(this.state.shapes));
+  };
+  moveBackward = () => {
+    const selectedElementIndex = this.state.shapes.indexOf(this.state.selectedShapeId);
+    const prevElementIndex = selectedElementIndex - 1;
+
+    const newShapes = [...this.state.shapes];
+    newShapes[selectedElementIndex] = this.state.shapes[prevElementIndex];
+    newShapes[prevElementIndex] = this.state.shapes[selectedElementIndex];
+    this.setState({ shapes: newShapes }, () => console.log(this.state.shapes));
+  };
+
+  canMoveToFront = () => {
+    return true;
+  };
+  canMoveToBack = () => {
+    return true;
+  };
+
   /**---------------------------------------------
    * ADD SHAPE
    * ---------------------------------------------*/
@@ -297,38 +325,36 @@ class WorkspaceRoute extends Component {
     });
   };
 
-    /**---------------------------------------------
+  /**---------------------------------------------
    * RESIZE SHAPE
    * ---------------------------------------------*/
-    resizeShape = (newData) => {
-      if (this.state.selectedShapeId) {
-        this.updateShape(this.state.selectedShapeId, newData);
-      }
-    };
-    startResizeShape = (id) => {
-      // let shapesMap = { ...this.state.shapesMap };
-      // this.setState({ tempShape: shapesMap[id] });
-    };
-    stopResizeShape = () => {
-      // if (
-      //   this.state.tempShape &&
-      //   this.getCurrShape() &&
-      //   this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
-      // ) {
-      //   const data = {
-      //     shape: this.getCurrShape,
-      //     oldValue: this.state.tempShape,
-      //     newValue: this.getCurrShape(),
-      //   };
-  
-        // const commandObj = new ResizeShapeCommandObject(this.undoHandler, data);
-        // if (commandObj.canExecute()) {
-        //   commandObj.execute();
-        // }
-      //}
-  
-      // this.setState({ tempShape: null });
-    };
+  resizeShape = (newData) => {
+    if (this.state.selectedShapeId) {
+      this.updateShape(this.state.selectedShapeId, newData);
+    }
+  };
+  startResizeShape = (id) => {
+    // let shapesMap = { ...this.state.shapesMap };
+    // this.setState({ tempShape: shapesMap[id] });
+  };
+  stopResizeShape = () => {
+    // if (
+    //   this.state.tempShape &&
+    //   this.getCurrShape() &&
+    //   this.state.tempShape.initCoords.x !== this.getCurrShape().initCoords.x
+    // ) {
+    //   const data = {
+    //     shape: this.getCurrShape,
+    //     oldValue: this.state.tempShape,
+    //     newValue: this.getCurrShape(),
+    //   };
+    // const commandObj = new ResizeShapeCommandObject(this.undoHandler, data);
+    // if (commandObj.canExecute()) {
+    //   commandObj.execute();
+    // }
+    //}
+    // this.setState({ tempShape: null });
+  };
 
   /**---------------------------------------------
    * DELETE SHAPE
@@ -568,7 +594,6 @@ class WorkspaceRoute extends Component {
             currVertexCount,
             changeCurrVertexCount: this.changeCurrVertexCount,
 
-
             shapes,
             shapesMap,
             addShape: this.addShape,
@@ -589,12 +614,14 @@ class WorkspaceRoute extends Component {
             canUndo: this.canUndo(),
             canRedo: this.canRedo(),
             canRepeat: this.canRepeat(),
+
+            moveForward: this.moveForward,
+            moveBackward: this.moveBackward,
+            canMoveToFront: this.canMoveToFront(),
+            canMoveToBack: this.canMoveToBack(),
           }}
         >
-          <Layers 
-            objects={this.state.shapes}
-            shapesMap={this.state.shapesMap}
-          />
+          <Layers objects={this.state.shapes} shapesMap={this.state.shapesMap} />
 
           <Workspace />
           <ControlPanel />

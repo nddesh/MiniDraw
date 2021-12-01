@@ -22,6 +22,7 @@ const Layers = ({objects =[], shapesMap={}}) => {
         const object = shapesMap[id];
         return (
           <ListItem
+            key={id}
             type={object.type}
             index={index}
           />
