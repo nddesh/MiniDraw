@@ -245,17 +245,17 @@ const UndoRedo = ({ undo, redo, repeat, disableUndo, disableRedo, canRepeat }) =
   );
 };
 
-const OrderPanel = ({ moveForward, moveBackward, disableMoveToFront, disabledMoveToBack }) => {
+const OrderPanel = ({ moveForward, moveBackward, disableMoveForward, disableMoveBackward }) => {
   return (
     <div className="Control">
       <h3>Move to Front/Move to Back:</h3>
       <div className="UndoRedoButtonsContainer">
-        <button disabled={disableMoveToFront} onClick={() => moveForward()}>
+        <button disabled={disableMoveForward} onClick={() => moveForward()}>
           {/* <ImUndo className="ButtonIcon" /> */}
           Send Forward
         </button>
 
-        <button disabled={disabledMoveToBack} onClick={() => moveBackward()}>
+        <button disabled={disableMoveBackward} onClick={() => moveBackward()}>
           {/* <ImRedo className="ButtonIcon" /> */}
           Send Backward
         </button>
@@ -293,8 +293,8 @@ const ControlPanel = () => {
     canRepeat,
     moveForward,
     moveBackward,
-    canMoveToFront,
-    canMoveToBack,
+    canMoveForward,
+    canMoveBackward,
   } = useContext(ControlContext);
 
   return (
@@ -347,8 +347,8 @@ const ControlPanel = () => {
       <OrderPanel
         moveForward={moveForward}
         moveBackward={moveBackward}
-        disableMoveToFront={!canMoveToFront}
-        disabledMoveToBack={!canMoveToBack}
+        disableMoveForward={!canMoveForward}
+        disableMoveBackward={!canMoveBackward}
       />
     </div>
   );
