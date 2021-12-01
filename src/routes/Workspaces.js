@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import "./Workspaces.css"
 
 import { FirebaseContext } from '../contexts/firebaseContext';
 
@@ -25,7 +26,7 @@ const Workspaces = () => {
   return (
     <>
       <h1>Workspaces</h1>
-      <ul>
+      <ul id="workspaces">
         {workspaces.map((w) => {
           return (
             <Link to={`/workspaces/${w.id}`} key={w.id}>
