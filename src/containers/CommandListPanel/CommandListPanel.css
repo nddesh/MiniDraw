@@ -1,9 +1,9 @@
 .CommandListPanel {
   position: absolute;
   top: 10px;
-  left: 1260px;
+  left: 1000px;
   width: 180px;
-  height: 700px;
+  height: 900px;
   border: 1px solid black;
   overflow: scroll;
 }

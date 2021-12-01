@@ -272,7 +272,7 @@ const UndoRedo = ({ undo, redo, repeat, disableUndo, disableRedo, canRepeat }) =
 const OrderPanel = ({ moveForward, moveBackward, disableMoveForward, disableMoveBackward }) => {
   return (
     <div className="Control">
-      <h3>Move to Front/Move to Back:</h3>
+      <h3>Send Forward/Backward:</h3>
       <div className="UndoRedoButtonsContainer">
         <button disabled={disableMoveForward} onClick={() => moveForward()}>
           {/* <ImUndo className="ButtonIcon" /> */}

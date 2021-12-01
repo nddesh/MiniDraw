@@ -1,6 +1,5 @@
 import React from 'react';
-import { getDoc, doc, collection, setDoc, getDocs } from 'firebase/firestore';
-
+import { getDoc, doc, collection, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { createCommandInstance } from '../shared/commandObjects/utils';
 
 export const FirebaseContext = React.createContext({});
@@ -16,6 +15,7 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
       // });
       // return { ...doc.workspaceData, commandList: newCommandList };
       return {
+        name: doc.name,
         shapes: doc.workspaceData.shapes,
         shapesMap: doc.workspaceData.shapesMap,
       };
@@ -53,11 +53,12 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     return workspaces;
   };
 
-  const addWorkspace = async (id) => {
+  const addWorkspace = async (id, name) => {
     const workspacesRef = collection(firestore, 'workspaces');
 
     await setDoc(doc(workspacesRef, id), {
       users: [], // TODO: Add current user.
+      name: name,
       workspaceData: {
         shapes: [],
         shapesMap: {},
@@ -67,7 +68,9 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     });
   };
 
-
+  const deleteWorkspace = async (id) => {
+    await deleteDoc(doc(firestore, 'workspaces', id));
+  };
 
   return (
     <FirebaseContext.Provider
@@ -78,6 +81,7 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
         updateWorkspaceData,
         getWorkspaces,
         addWorkspace,
+        deleteWorkspace,
       }}
     >
       {children}
