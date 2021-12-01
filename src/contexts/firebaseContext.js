@@ -26,7 +26,8 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
 
   const updateWorkspaceData = async (
     workspaceId,
-    { shapes, shapesMap, commandList, currCommand }
+    { shapes, shapesMap, commandList, currCommand },
+    name
   ) => {
     const updatedDoc = {
       shapes,
@@ -39,6 +40,7 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     await setDoc(doc(workspacesRef, workspaceId), {
       users: ['test-user'],
       workspaceData: updatedDoc,
+      name: name,
     });
   };
 

@@ -11,29 +11,39 @@ const Workspaces = () => {
 
   React.useEffect(() => {
     getData();
-  });
+  }, []);
 
   const getData = async () => {
     const workspaces = await getWorkspaces();
     setWorkspaces(workspaces);
+    // setWorkspaces([]);
   };
 
   const handleAddWorkspace = async () => {
     const workspaceName = prompt('Create the name of your workspace');
-    const id = uuidv4();
-    await addWorkspace(id, workspaceName);
+    if (workspaceName === null) {
+      return;
+    }
+    if (workspaceName === '') {
+      alert('Cannot create the workspace without a name.');
+    } else {
+      const id = uuidv4();
+      await addWorkspace(id, workspaceName);
+      await getData();
+    }
   };
 
   const handleDeleteWorkspace = async (id, name) => {
     const result = window.confirm(`Do you want to delete workspace ${name}`);
     if (result) {
       await deleteWorkspace(id);
+      await getData();
     }
   };
 
   return (
     <>
-      <h1>Workspaces</h1>
+      <h2>Workspaces</h2>
       <ul id="workspaces" className={'workspace-list'}>
         {workspaces.map((w) => {
           return (
