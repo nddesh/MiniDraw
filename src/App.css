@@ -54,3 +54,8 @@ button:disabled {
   /* margin: 30px auto; */
   align-items: center;
 }
+
+.delete-button {
+  background-color: red;
+  color: white;
+}
