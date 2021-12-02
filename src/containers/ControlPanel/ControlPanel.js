@@ -27,7 +27,7 @@ const Modes = ({ currMode, changeCurrMode, currBorderColor, currFillColor, selec
         </div>
         <div
           className={['Mode', currMode === 'line' ? 'Active' : null].join(' ')}
-          onClick={() => changeCurrMode('line')}
+          onClick={() => {changeCurrMode('line');selectShape(undefined);}}
         >
           <img src={LineImg} alt="line" />
         </div>
@@ -242,7 +242,7 @@ const BorderWidth = ({
           onChange={(e) => changeCurrBorderWidth(e.target.value)}
           onMouseDown={(e) => startSlideBorderWidth(e.target.value)}
           onMouseUp={(e) => stopSlideBorderWidth(e.target.value)}
-          min={0}
+          min={1}
           max={30}
           value={currBorderWidth}
         />

@@ -20,6 +20,7 @@ import ChangeBorderWidthCommandObject from '../../shared/commandObjects/ChangeBo
 import ChangeVertexCountCommandObject from '../../shared/commandObjects/ChangeVertexCountCommandObject';
 import MoveShapeCommandObject from '../../shared/commandObjects/MoveShapeCommandObject';
 import ResizeCommandObject from '../../shared/commandObjects/ResizeCommandObject';
+import ChangeLayerOrderObjects from '../../shared/commandObjects/ChangeLayerOrderObjects';
 
 import { addEventListeners } from './utils';
 import { FaTextHeight } from 'react-icons/fa';
@@ -87,6 +88,8 @@ class WorkspaceRoute extends Component {
       changeFillColor: this.changeFillColor,
       changeBorderWidth: this.changeBorderWidth,
       changeCurrVertexCount: this.changeCurrVertexCount,
+      moveForward: this.moveForward,
+      moveBackward: this.moveBackward,
     };
   }
 
@@ -222,6 +225,7 @@ class WorkspaceRoute extends Component {
         currFillColor: fillColor ? fillColor : currFillColor,
         currVertexCount: vertexCount ? vertexCount : currVertexCount,
         currInputText: inputText ? inputText : currInputText,
+        currMode: 'select',
       });
     }
   };
@@ -261,7 +265,7 @@ class WorkspaceRoute extends Component {
     );
     return visibleShapes;
   };
-  moveForward = () => {
+  moveForward = (isRepeat) => {
     // Find the nextElementId in visibleShapes
     const visibleShapes = this.getVisibleShapes();
     const selectedElementIndexInVisibleShapes = visibleShapes.indexOf(this.state.selectedShapeId);
@@ -274,9 +278,26 @@ class WorkspaceRoute extends Component {
     const newShapes = [...this.state.shapes];
     newShapes[selectedElementIndex] = this.state.shapes[nextElementIndex];
     newShapes[nextElementIndex] = this.state.shapes[selectedElementIndex];
+
+    // create new command object
     this.setState({ shapes: newShapes });
+
+    if (this.getCurrShape()) {
+      const data = {
+        type: 'forward',
+        oldValue: selectedElementIndex,
+        newValue: nextElementIndex,
+        targetShape: this.state.selectedShapeId,
+        switchedShape: nextElementId,
+        mode: this.state.shapesMap[this.state.selectedShapeId].type,
+      };
+      const commandObj = new ChangeLayerOrderObjects(this.undoHandler, data, isRepeat);
+      if (commandObj.canExecute()) {
+        commandObj.execute();
+      }
+    }
   };
-  moveBackward = () => {
+  moveBackward = (isRepeat) => {
     // Find the nextElementId in visibleShapes
     const visibleShapes = this.getVisibleShapes();
     const selectedElementIndexInVisibleShapes = visibleShapes.indexOf(this.state.selectedShapeId);
@@ -289,6 +310,22 @@ class WorkspaceRoute extends Component {
     newShapes[selectedElementIndex] = this.state.shapes[prevElementIndex];
     newShapes[prevElementIndex] = this.state.shapes[selectedElementIndex];
     this.setState({ shapes: newShapes });
+
+    if (this.getCurrShape()) {
+      const data = {
+        type: 'backward',
+        oldValue: selectedElementIndex,
+        newValue: prevElementIndex,
+        targetShape: this.state.selectedShapeId,
+        switchedShape: prevElementId,
+        mode: this.state.shapesMap[this.state.selectedShapeId].type,
+      };
+      const commandObj = new ChangeLayerOrderObjects(this.undoHandler, data, isRepeat);
+      if (commandObj.canExecute()) {
+        commandObj.execute();
+      }
+    }
+
   };
 
   canMoveForward = () => {
@@ -616,23 +653,6 @@ class WorkspaceRoute extends Component {
       this.updateShape(this.state.selectedShapeId, { vertexCount });
     }
   };
-  // startChangingVertexCount = (vertexCount) => {
-  //   this.setState({ tempVertexCount: vertexCount });
-  // };
-  // stopChangingVertexCount = () => {
-  //   if (this.state.tempVertexCount && this.state.currVertexCount && this.getCurrShape()) {
-  //     const data = {
-  //       oldValue: this.state.tempVertexCount,
-  //       newValue: this.state.currVertexCount,
-  //       targetShape: this.getCurrShape(),
-  //     };
-  //     const commandObj = new ChangeVertexCountCommandObject(this.undoHandler, data);
-  //     if (commandObj.canExecute()) {
-  //       commandObj.execute();
-  //     }
-  //   }
-  //   this.setState({ tempVertexCount: null });
-  // };
 
   /**---------------------------------------------
    * TEXT CHANGE

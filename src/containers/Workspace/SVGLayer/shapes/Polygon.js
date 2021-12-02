@@ -10,10 +10,11 @@ export default ({
   borderColor,
   borderWidth,
   filter,
+  radius,
 }) => {
     const points = [];
 
-    const radius = Math.sqrt(width * width + height * height) / 2;
+    // const radius = Math.sqrt(width * width + height * height) / 2;
     const angle = ((vertexCount - 2) * 180) / (2*vertexCount);
     const top = y + height / 2;
     const left = x + width / 2;
