@@ -90,6 +90,8 @@ class WorkspaceRoute extends Component {
       changeCurrVertexCount: this.changeCurrVertexCount,
       moveForward: this.moveForward,
       moveBackward: this.moveBackward,
+      canMoveForward: this.canMoveForward,
+      canMoveBackward: this.canMoveBackward,
     };
   }
 

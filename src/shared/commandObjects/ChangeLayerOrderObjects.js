@@ -1,3 +1,4 @@
+import { connectFirestoreEmulator } from '@firebase/firestore';
 import CommandObject from './CommandObject';
 import { COMMAND_TYPES } from './constants';
 
@@ -11,6 +12,8 @@ export default class ChangeLayerOrderObjects extends CommandObject {
     this.oldValue = data.oldValue; 
     this.type = data.type;
     this.mode = data.mode;
+    this.canMoveForward = undoHandler.canMoveForward;
+    this.canMoveBackward = undoHandler.canMoveBackward;
     this.commandName = `${isRepeat ? `[Repeat] ` : ''} Send ${this.mode} ${this.type}`;
     this.repeatAction = this.type === 'forward' ? undoHandler.moveForward : undoHandler.moveBackward;
   }
@@ -59,6 +62,10 @@ export default class ChangeLayerOrderObjects extends CommandObject {
     this.undoHandler.selectShape(this.targetObject);
   }
 
+
+
+ 
+
   
   canRepeat() {
     // must have a slected object
@@ -70,11 +77,14 @@ export default class ChangeLayerOrderObjects extends CommandObject {
         return false;
     } 
 
+    // console.log(this.newValue, this.oldValue, this.canMoveForward(), this.canMoveBackward());
+
+
     if (this.type === 'forward') {
-        return this.newValue < this.undoHandler.getCurrState().shapes.length - 1;
+        return this.canMoveForward();
     }
     if (this.type === 'backward') {
-        return this.newValue > 0;
+        return this.canMoveBackward();
     }
 
     return true;
