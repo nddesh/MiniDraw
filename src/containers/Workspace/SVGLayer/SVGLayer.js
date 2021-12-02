@@ -61,7 +61,21 @@ const SVGLayer = () => {
     selection_group_5: [0, 0, 0, 1],
     selection_group_6: [1, 0, 0, 1],
     selection_group_7: [1, 0, 0, 0],
+    // for lines 
+    selection_group_8: [1, 1, 0, 0],
+    selection_group_9: [0, 0, 1, 1],
   };
+
+  // const resizeDirectionDict = {
+  //   selection_group_0: [1, 1, 0, 0],
+  //   selection_group_7: [0, 1, 0, 0],
+  //   selection_group_6: [0, 1, 1, 0],
+  //   selection_group_5: [0, 0, 1, 0],
+  //   selection_group_4: [0, 0, 1, 1],
+  //   selection_group_5: [0, 0, 0, 1],
+  //   selection_group_3: [1, 0, 0, 1],
+  //   selection_group_1: [1, 0, 0, 0],
+  // };
 
   const handleMouseDown = (e) => {
     if (currMode !== 'select') {
@@ -78,7 +92,6 @@ const SVGLayer = () => {
       } else {
         if (e.target.className?.baseVal === 'selectionGroup') {
           // resize
-          // console.log("resize");
           setResizing(true);
           setMouseDownPoint({
             x: e.nativeEvent.offsetX,
@@ -121,6 +134,7 @@ const SVGLayer = () => {
         },
       });
     } else if (resizing && resizingShape) {
+      
       const direction = resizeDirection;
 
       const initCoordsX = resizeDirectionDict[direction][0];
@@ -131,20 +145,39 @@ const SVGLayer = () => {
       const deltaX = e.nativeEvent.offsetX - mouseDownPoint.x;
       const deltaY = e.nativeEvent.offsetY - mouseDownPoint.y;
 
-      const initCoordsXResult = resizingShape.initCoords.x + initCoordsX * deltaX;
-      const initCoordsYResult = resizingShape.initCoords.y + initCoordsY * deltaY;
-      const finalCoordsXResult = resizingShape.finalCoords.x + finalCoordsX * deltaX;
-      const finalCoordsYResult = resizingShape.finalCoords.y + finalCoordsY * deltaY;
+      let initCoordsX_test = resizingShape.initCoords.x;
+      let initCoordsY_test = resizingShape.initCoords.y;
+      let finalCoordsX_test = resizingShape.finalCoords.x;
+      let finalCoordsY_test = resizingShape.finalCoords.y;
+      
+
+      if (direction !== 'selection_group_8' && direction !== 'selection_group_9') {
+
+         initCoordsX_test = Math.min(resizingShape.initCoords.x, resizingShape.finalCoords.x);
+         initCoordsY_test = Math.min(resizingShape.initCoords.y, resizingShape.finalCoords.y);
+         finalCoordsX_test = Math.max(resizingShape.finalCoords.x, resizingShape.initCoords.x);
+         finalCoordsY_test = Math.max(resizingShape.finalCoords.y, resizingShape.initCoords.y);
+        //resizingShape.initCoords.x 
+        
+      }
+      const initCoordsXResult = initCoordsX_test + initCoordsX * deltaX;
+      const initCoordsYResult = initCoordsY_test+initCoordsY * deltaY;
+      const finalCoordsXResult = finalCoordsX_test + finalCoordsX * deltaX;
+      const finalCoordsYResult = finalCoordsY_test + finalCoordsY * deltaY;
 
       // if result shape is too small or too big, do not resize
-      if (
-        finalCoordsXResult - initCoordsXResult < 20 ||
-        finalCoordsYResult - initCoordsXResult < 20 ||
-        finalCoordsXResult - initCoordsXResult > 500 ||
-        finalCoordsYResult - initCoordsXResult > 500
-      ) {
-        return;
-      }
+      
+      // if (
+      //   Math.abs(finalCoordsXResult - initCoordsXResult) < 20 ||
+      //   Math.abs(finalCoordsYResult - initCoordsXResult) < 20 ||
+      //     Math.abs(finalCoordsXResult - initCoordsXResult) > 500 ||
+      //       Math.abs(finalCoordsYResult - initCoordsXResult) > 500
+      // ) {
+      //   console.log("resize too small or too big");
+      //   return;
+      // }
+
+      // console.log(initCoordsXResult, initCoordsYResult, finalCoordsXResult, finalCoordsYResult);
 
       resizeShape({
         initCoords: {
@@ -355,11 +388,13 @@ const SVGLayer = () => {
         });
       }
       case 'polygon': {
+        const width=Math.abs(finalCoords.x - initCoords.x);
+        const height = Math.abs(finalCoords.y - initCoords.y);
         return React.createElement(Polygon, {
           x: Math.min(initCoords.x, finalCoords.x),
           y: Math.min(initCoords.y, finalCoords.y),
-          width: Math.abs(finalCoords.x - initCoords.x),
-          height: Math.abs(finalCoords.y - initCoords.y),
+          width: width,
+          height: height,
           vertexCount,
           fillColor,
           borderColor,
@@ -367,6 +402,7 @@ const SVGLayer = () => {
           id,
           key,
           filter,
+          radius: Math.sqrt(width * width + height * height) / 2,
         });
       }
       case 'text': {
@@ -418,33 +454,71 @@ const SVGLayer = () => {
   const selectionHandler = () => {
     // check if a shape is selected
     if (selectedShapeId) {
-      var myPathBox = document
-        .getElementById(selectedShapeId)
-        ?.getBBox({ fill: true, stroke: true, clipped: true });
+  
 
       const shape = shapesMap[selectedShapeId];
-      if (!myPathBox || !shape || !selectedShapeId) {
+      if (!shape || !shape.visible) {
         return;
       }
-      if (shape?.type && shape.type !== 'line') {
+      const initCoordsX = Math.min(shape.initCoords.x, shape.finalCoords.x);
+      const initCoordsY = Math.min(shape.initCoords.y, shape.finalCoords.y);
+      const finalCoordsX = Math.max(shape.finalCoords.x, shape.initCoords.x);
+      const finalCoordsY = Math.max(shape.finalCoords.y, shape.initCoords.y);
+      const width = Math.abs(finalCoordsX - initCoordsX);
+      const height = Math.abs(finalCoordsY - initCoordsY);
+
+      // if (!myPathBox || !shape || !selectedShapeId) {
+      //   return;
+      // }
+      if (shape?.type && shape.type !== 'line' && shape.type !== 'polygon') {
         return React.createElement(Selection, {
           type: shape.type,
-          x: myPathBox.x,
-          y: myPathBox.y,
-          width: myPathBox.width,
-          height: myPathBox.height,
+          x: initCoordsX, //myPathBox.x,
+          y: initCoordsY,//myPathBox.y,
+          width: width, //myPathBox.width,
+          height: height, //myPathBox.height,
           borderWidth: shape.borderWidth,
         });
       } else if (shape?.type === 'line') {
-        console.log(shape);
         return React.createElement(Selection, {
-          type: shape.type,
+          type:'line',
           x1: shape.initCoords.x,
           y1: shape.initCoords.y,
           x2: shape.finalCoords.x,
           y2: shape.finalCoords.y,
           borderWidth: shape.borderWidth,
         });
+      } else if (shape?.type === 'polygon') {
+        const radius = Math.sqrt(width * width + height * height) / 2;
+          const center = {
+            x: initCoordsX + width / 2,
+            y: initCoordsY + height / 2,
+          };
+
+
+        if(currVertexCount!==3) {
+          return React.createElement(Selection, {
+            type: 'polygon',
+            x: center.x - radius,
+            y: center.y - radius,
+            width: 2*radius,
+            height: 2*radius,
+            vertexCount: shape.vertexCount,
+            borderWidth: shape.borderWidth,
+            radius,
+          });
+        } else {
+            return React.createElement(Selection, {
+              type: 'polygon',
+              x: center.x - radius,
+              y: center.y - radius,
+              width: 2*radius,
+              height: 1.5*radius,
+              vertexCount: shape.vertexCount,
+              borderWidth: shape.borderWidth,
+              radius,
+            });
+        }
       }
     }
   };
@@ -452,8 +526,8 @@ const SVGLayer = () => {
   return (
     <svg
       id="workspace-svg"
-      width="800"
-      height="700"
+      width="750"
+      height="900"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

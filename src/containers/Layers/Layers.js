@@ -7,7 +7,7 @@ import '../Layers/Layers.css';
 const ListItem = ({ type, index, selected }) => {
   return (
     <div className={`${selected ? 'list-item-selected' : ''}`}>
-      {type} {index}
+      {type} 
     </div>
   );
 };
