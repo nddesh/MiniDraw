@@ -109,6 +109,10 @@ class WorkspaceRoute extends Component {
           const data = document.data();
           if (data) {
             const { workspaceData } = data;
+            const { shapesMap } = workspaceData || {};
+            if (shapesMap && shapesMap[this.state.selectedShapeId] && shapesMap[this.state.selectedShapeId].visible !== true) {
+              this.selectShape(undefined);
+            }
             this.setState({ ...workspaceData });
           } else {
             window.location = '/';
@@ -331,7 +335,6 @@ class WorkspaceRoute extends Component {
         commandObj.execute();
       }
     }
-
   };
 
   canMoveForward = () => {
