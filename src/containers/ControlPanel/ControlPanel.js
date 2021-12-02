@@ -27,7 +27,10 @@ const Modes = ({ currMode, changeCurrMode, currBorderColor, currFillColor, selec
         </div>
         <div
           className={['Mode', currMode === 'line' ? 'Active' : null].join(' ')}
-          onClick={() => {changeCurrMode('line');selectShape(undefined);}}
+          onClick={() => {
+            changeCurrMode('line');
+            selectShape(undefined);
+          }}
         >
           <img src={LineImg} alt="line" />
         </div>
@@ -113,7 +116,7 @@ const ColorPickerPopup = ({
         id="head"
         name="head"
         value={color}
-        onBlur={stopChangeColor}
+        // onBlur={stopChangeColor}
         onChange={(e) => {
           if (
             !(
