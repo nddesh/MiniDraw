@@ -105,8 +105,12 @@ class WorkspaceRoute extends Component {
       (document) => {
         if (document) {
           const data = document.data();
-          const { workspaceData } = data;
-          this.setState({ ...workspaceData });
+          if (data) {
+            const { workspaceData } = data;
+            this.setState({ ...workspaceData });
+          } else {
+            window.location = '/';
+          }
         }
       }
     );
@@ -261,7 +265,7 @@ class WorkspaceRoute extends Component {
    * ---------------------------------------------*/
   getVisibleShapes = () => {
     const visibleShapes = this.state.shapes.filter(
-      (id) => this.state.shapesMap[id].visible === true
+      (id) => this.state.shapesMap[id]?.visible === true
     );
     return visibleShapes;
   };

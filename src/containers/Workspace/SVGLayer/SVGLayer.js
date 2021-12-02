@@ -457,7 +457,7 @@ const SVGLayer = () => {
   
 
       const shape = shapesMap[selectedShapeId];
-      if (!shape) {
+      if (!shape || !shape.visible) {
         return;
       }
       const initCoordsX = Math.min(shape.initCoords.x, shape.finalCoords.x);
