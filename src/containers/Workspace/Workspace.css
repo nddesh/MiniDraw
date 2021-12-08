@@ -10,6 +10,11 @@
 
   width: 750px;
   height: 900px;
+  user-select: none;
+}
+
+.Workspace text {
+  cursor: default;
 }
 
 #workspace-canvas,
