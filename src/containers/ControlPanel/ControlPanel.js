@@ -90,17 +90,10 @@ const Modes = ({ currMode, changeCurrMode, currBorderColor, currFillColor, selec
   );
 };
 
-const ColorPickerPopup = ({
-  currColor,
-  setCurrColor,
-  stopChangeColor,
-  conflictColors,
-  onClose,
-}) => {
+const ColorPickerPopup = ({ currColor, setCurrColor, conflictColors, onClose }) => {
   const [color, setColor] = React.useState(currColor);
   const handleConfirm = () => {
     setCurrColor(color);
-    stopChangeColor();
     onClose();
   };
 
@@ -139,7 +132,7 @@ const ColorPickerPopup = ({
     </div>
   );
 };
-const ColorPicker = ({ title, currColor, setCurrColor, stopChangeColor, conflictColors }) => {
+const ColorPicker = ({ title, currColor, setCurrColor, conflictColors }) => {
   const [open, setOpen] = React.useState(false);
 
   const handleOpenPopup = () => {
@@ -163,7 +156,6 @@ const ColorPicker = ({ title, currColor, setCurrColor, stopChangeColor, conflict
             <ColorPickerPopup
               currColor={currColor}
               setCurrColor={setCurrColor}
-              stopChangeColor={stopChangeColor}
               conflictColors={conflictColors}
               onClose={handleClosePopup}
             />
@@ -193,37 +185,24 @@ const ColorPicker = ({ title, currColor, setCurrColor, stopChangeColor, conflict
   );
 };
 
-const BorderColor = ({
-  currMode,
-  currBorderColor,
-  changeCurrBorderColor,
-  currFillColor,
-  stopChangeBorderColor,
-}) => {
+const BorderColor = ({ currMode, currBorderColor, currFillColor, changeBorderColor }) => {
   return (
     <ColorPicker
       title={'Border color:'}
       currColor={currBorderColor}
-      setCurrColor={changeCurrBorderColor}
+      setCurrColor={changeBorderColor}
       conflictColors={[currFillColor, currMode === 'line' ? 'transparent' : null]}
-      stopChangeColor={stopChangeBorderColor}
     />
   );
 };
 
-const FillColor = ({
-  currFillColor,
-  changeCurrFillColor,
-  stopChangeFillColor,
-  currBorderColor,
-}) => {
+const FillColor = ({ currFillColor, currBorderColor, changeFillColor }) => {
   return (
     <ColorPicker
       title={'Fill color:'}
       currColor={currFillColor}
-      setCurrColor={changeCurrFillColor}
+      setCurrColor={changeFillColor}
       conflictColors={[currBorderColor]}
-      stopChangeColor={stopChangeFillColor}
     />
   );
 };
@@ -383,13 +362,11 @@ const ControlPanel = () => {
     currMode,
     changeCurrMode,
     currBorderColor,
-    changeCurrBorderColor,
-    stopChangeBorderColor,
+    changeBorderColor,
     currFillColor,
-    changeCurrFillColor,
+    changeFillColor,
     currVertexCount,
     changeCurrVertexCount,
-    stopChangeFillColor,
     currBorderWidth,
     changeCurrBorderWidth,
     stopSlideBorderWidth,
@@ -434,9 +411,8 @@ const ControlPanel = () => {
       <BorderColor
         currMode={currMode}
         currBorderColor={currBorderColor}
-        changeCurrBorderColor={changeCurrBorderColor}
         currFillColor={currFillColor}
-        stopChangeBorderColor={stopChangeBorderColor}
+        changeBorderColor={changeBorderColor}
       />
       <BorderWidth
         currBorderWidth={currBorderWidth}
@@ -446,9 +422,8 @@ const ControlPanel = () => {
       />
       <FillColor
         currFillColor={currFillColor}
-        changeCurrFillColor={changeCurrFillColor}
         currBorderColor={currBorderColor}
-        stopChangeFillColor={stopChangeFillColor}
+        changeFillColor={changeFillColor}
       />
       <Delete selectedShapeId={selectedShapeId} deleteSelectedShape={deleteSelectedShape} />
       <UndoRedo
