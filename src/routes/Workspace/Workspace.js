@@ -772,7 +772,7 @@ class WorkspaceRoute extends Component {
               currCommandIndex={this.state.currCommand}
             />
             <Layers
-              objects={this.getVisibleShapes()}
+              objects={this.getVisibleShapes() ? this.getVisibleShapes().reverse() : []}
               shapesMap={this.state.shapesMap}
               selectedShapeId={this.state.selectedShapeId}
             />
