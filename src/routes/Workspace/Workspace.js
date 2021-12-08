@@ -110,7 +110,11 @@ class WorkspaceRoute extends Component {
           if (data) {
             const { workspaceData } = data;
             const { shapesMap } = workspaceData || {};
-            if (shapesMap && shapesMap[this.state.selectedShapeId] && shapesMap[this.state.selectedShapeId].visible !== true) {
+            if (
+              shapesMap &&
+              shapesMap[this.state.selectedShapeId] &&
+              shapesMap[this.state.selectedShapeId].visible !== true
+            ) {
               this.selectShape(undefined);
             }
             this.setState({ ...workspaceData });
@@ -499,50 +503,21 @@ class WorkspaceRoute extends Component {
    * ---------------------------------------------*/
   // Workaround to change fill color without using color picker
   changeBorderColor = (borderColor, isRepeat) => {
-    const data = {
-      oldValue: this.state.currBorderColor,
-      newValue: borderColor,
-      targetShape: this.getCurrShape(),
-    };
-    const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data, isRepeat);
-    if (commandObj.canExecute()) {
-      commandObj.execute();
-    }
-
     if (this.state.selectedShapeId) {
-      this.updateShape(this.state.selectedShapeId, { borderColor });
-    }
-  };
-  changeCurrBorderColor = (borderColor) => {
-    if (!this.state.tempBorderColor) {
-      this.disableUpdateFirestore(() => {
-        this.startChangingBorderColor(borderColor);
-      });
-    }
-
-    this.setState({ currBorderColor: borderColor });
-    if (this.state.selectedShapeId) {
-      this.updateShape(this.state.selectedShapeId, { borderColor });
-    }
-  };
-  startChangingBorderColor = (borderColor) => {
-    this.setState({ tempBorderColor: borderColor });
-  };
-  stopChangingBorderColor = () => {
-    this.enableUpdateFirestore(() => {
-      if (this.state.tempBorderColor !== this.state.currBorderColor && this.getCurrShape()) {
-        const data = {
-          oldValue: this.state.tempBorderColor,
-          newValue: this.state.currBorderColor,
-          targetShape: this.getCurrShape(),
-        };
-        const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data);
-        if (commandObj.canExecute()) {
-          commandObj.execute();
-        }
+      const data = {
+        oldValue: this.state.currBorderColor,
+        newValue: borderColor,
+        targetShape: this.getCurrShape(),
+      };
+      const commandObj = new ChangeBorderColorCommandObject(this.undoHandler, data, isRepeat);
+      if (commandObj.canExecute()) {
+        commandObj.execute();
       }
-      this.setState({ tempFillColor: null });
-    });
+      this.setState({ currBorderColor: borderColor });
+      this.updateShape(this.state.selectedShapeId, { borderColor });
+    } else {
+      this.setState({ currBorderColor: borderColor });
+    }
   };
 
   /**---------------------------------------------
@@ -597,49 +572,24 @@ class WorkspaceRoute extends Component {
 
   // Workaround to change fill color without using color picker
   changeFillColor = (fillColor, isRepeat) => {
-    const data = {
-      oldValue: this.state.currFillColor,
-      newValue: fillColor,
-      targetShape: this.getCurrShape(),
-    };
-    const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data, isRepeat);
-    if (commandObj.canExecute()) {
-      commandObj.execute();
-    }
     if (this.state.selectedShapeId) {
-      this.updateShape(this.state.selectedShapeId, { fillColor });
-    }
-  };
-  changeCurrFillColor = (fillColor) => {
-    if (!this.state.tempFillColor) {
-      this.disableUpdateFirestore(() => {
-        this.startChangingFillColor(fillColor);
-      });
-    }
-    this.setState({ currFillColor: fillColor });
-    if (this.state.selectedShapeId) {
-      this.updateShape(this.state.selectedShapeId, { fillColor });
-    }
-  };
-  startChangingFillColor = (fillColor) => {
-    this.setState({ tempFillColor: fillColor });
-  };
-  stopChangingFillColor = () => {
-    this.enableUpdateFirestore(() => {
-      if (this.state.tempFillColor && this.state.currFillColor && this.getCurrShape()) {
-        const data = {
-          oldValue: this.state.tempFillColor,
-          newValue: this.state.currFillColor,
-          targetShape: this.getCurrShape(),
-        };
-        const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data);
-        if (commandObj.canExecute()) {
-          commandObj.execute();
-        }
+      const data = {
+        oldValue: this.state.currFillColor,
+        newValue: fillColor,
+        targetShape: this.getCurrShape(),
+      };
+
+      const commandObj = new ChangeFillColorCommandObject(this.undoHandler, data, isRepeat);
+      if (commandObj.canExecute()) {
+        commandObj.execute();
       }
-      this.setState({ tempFillColor: null });
-    });
+      this.setState({ currFillColor: fillColor });
+      this.updateShape(this.state.selectedShapeId, { fillColor });
+    } else {
+      this.setState({ currFillColor: fillColor });
+    }
   };
+
   /**---------------------------------------------
    * CHANGE VERTEX COUNT
    * ---------------------------------------------*/
@@ -717,15 +667,13 @@ class WorkspaceRoute extends Component {
             currMode,
             changeCurrMode: this.changeCurrMode,
             currBorderColor,
-            changeCurrBorderColor: this.changeCurrBorderColor,
-            stopChangeBorderColor: this.stopChangingBorderColor,
+            changeBorderColor: this.changeBorderColor,
             currBorderWidth,
             changeCurrBorderWidth: this.changeCurrBorderWidth,
             startSlideBorderWidth: this.startSlideBorderWidth,
             stopSlideBorderWidth: this.stopSlideBorderWidth,
             currFillColor,
-            changeCurrFillColor: this.changeCurrFillColor,
-            stopChangeFillColor: this.stopChangingFillColor,
+            changeFillColor: this.changeFillColor,
             currVertexCount,
             changeCurrVertexCount: this.changeCurrVertexCount,
             currText,
@@ -772,7 +720,7 @@ class WorkspaceRoute extends Component {
               currCommandIndex={this.state.currCommand}
             />
             <Layers
-              objects={this.getVisibleShapes()}
+              objects={this.getVisibleShapes() ? this.getVisibleShapes().reverse() : []}
               shapesMap={this.state.shapesMap}
               selectedShapeId={this.state.selectedShapeId}
             />

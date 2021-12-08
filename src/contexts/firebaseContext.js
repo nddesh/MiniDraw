@@ -1,5 +1,5 @@
 import React from 'react';
-import { getDoc, doc, collection, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { getDoc, doc, collection, setDoc, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
 import { createCommandInstance } from '../shared/commandObjects/utils';
 
 export const FirebaseContext = React.createContext({});
@@ -37,10 +37,10 @@ export const FirebaseProvider = ({ firebase, firestore, children }) => {
     };
     const workspacesRef = collection(firestore, 'workspaces');
     // TODO: Replace test-user with real user.
-    await setDoc(doc(workspacesRef, workspaceId), {
-      users: ['test-user'],
+    await updateDoc(doc(workspacesRef, workspaceId), {
+      // users: ['test-user'],
       workspaceData: updatedDoc,
-      name: name,
+      // name: name,
     });
   };
 
