@@ -109,7 +109,7 @@ class WorkspaceRoute extends Component {
           const data = document.data();
           if (data) {
             const { workspaceData } = data;
-            const { shapesMap } = workspaceData || {};
+            const { shapesMap, shapes } = workspaceData || {};
             if (
               shapesMap &&
               shapesMap[this.state.selectedShapeId] &&
@@ -117,7 +117,20 @@ class WorkspaceRoute extends Component {
             ) {
               this.selectShape(undefined);
             }
-            this.setState({ ...workspaceData });
+            // Workaround to check whether the workspace was reset from others
+            if (
+              shapes &&
+              shapes.length <= 0 &&
+              this.state.shapes.length !== shapes.length &&
+              shapesMap &&
+              Object.keys(shapesMap).length <= 0 &&
+              Object.keys(shapesMap).length !== Object.keys(this.state.shapesMap)
+            ) {
+              alert('Oops! Someone has reset the workspace. Your workspace will also be reset.');
+              this.setState({ ...defaultState });
+            } else {
+              this.setState({ ...workspaceData });
+            }
           } else {
             window.location = '/';
           }
@@ -638,6 +651,7 @@ class WorkspaceRoute extends Component {
     if (result) {
       this.setState({
         ...defaultState,
+        workspaceName: this.state.workspaceName,
       });
     }
   };
