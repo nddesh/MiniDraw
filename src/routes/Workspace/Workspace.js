@@ -638,6 +638,7 @@ class WorkspaceRoute extends Component {
     if (result) {
       this.setState({
         ...defaultState,
+        workspaceName: this.state.workspaceName,
       });
     }
   };
