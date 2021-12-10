@@ -12,6 +12,7 @@
   height: 450px;
 
   user-select: none;
+  overflow: auto;
 }
 
 .Layers p {
