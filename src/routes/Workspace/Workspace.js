@@ -127,7 +127,7 @@ class WorkspaceRoute extends Component {
               Object.keys(shapesMap).length !== Object.keys(this.state.shapesMap)
             ) {
               alert('Oops! Someone has reset the workspace. Your workspace will also be reset.');
-              this.setState({ ...defaultState });
+              this.setState({ ...defaultState, workspaceName: this.state.workspaceName });
             } else {
               this.setState({ ...workspaceData });
             }
